@@ -1,0 +1,23 @@
+{
+  "db": "PostgreSQL",
+  "c3748d771ecd9505bc5224436c6117ee392f0222585ba79f881b2c7a14cfe3db": {
+    "query": "SELECT EXISTS (SELECT 1 from cic_victims WHERE name = $1);",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  }
+}

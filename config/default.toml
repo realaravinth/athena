@@ -1,5 +1,6 @@
 debug = true
 source_code = "https://github.com/realaravinth/athena"
+password = "password"
 
 [server]
 # Please set a unique value, your mCaptcha instance's security depends on this being 
@@ -13,7 +14,6 @@ ip= "0.0.0.0"
 # enter your hostname, eg: example.com
 domain = "localhost"
 allow_registration = true
-#url_prefix = ""
 
 [database]
 # This section deals with the database location and how to access it

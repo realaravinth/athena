@@ -77,6 +77,7 @@ pub struct Settings {
     pub database: Database,
     pub server: Server,
     pub source_code: String,
+    pub password: String,
 }
 
 #[cfg(not(tarpaulin_include))]

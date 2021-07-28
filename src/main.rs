@@ -25,11 +25,12 @@ use actix_web::{
 use lazy_static::lazy_static;
 use log::info;
 
+mod api;
 mod data;
 mod settings;
 
 pub use crate::data::Data;
-//pub use api::v1::ROUTES as V1_API_ROUTES;
+pub use api::v1::ROUTES as V1_API_ROUTES;
 pub use settings::Settings;
 
 lazy_static! {
@@ -48,8 +49,6 @@ pub type AppData = actix_web::web::Data<Arc<crate::data::Data>>;
 #[cfg(not(tarpaulin_include))]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    //    use api::v1;
-
     env::set_var("RUST_LOG", "info");
 
     pretty_env_logger::init();
@@ -77,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_middleware::NormalizePath::new(
                 actix_middleware::TrailingSlash::Trim,
             ))
-            //    .configure(v1::services)
+            .configure(api::v1::services)
             .app_data(get_json_err())
     })
     .bind(SETTINGS.server.get_ip())
