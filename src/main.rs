@@ -27,6 +27,7 @@ use log::info;
 
 mod api;
 mod data;
+mod errors;
 mod settings;
 
 pub use crate::data::Data;
