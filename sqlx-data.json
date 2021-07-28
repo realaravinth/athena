@@ -1,5 +1,23 @@
 {
   "db": "PostgreSQL",
+  "1255a708d225e2783bfe1d7dd8e12b6a1e5fb6e83dcaa9afdbaa5504b78779a6": {
+    "query": "SELECT name FROM cic_victims",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "56891344bdf70992682162660d85124270b3e1edc458e71a2a9e87e8594dda17": {
     "query": "INSERT INTO cic_victims (name) VALUES ($1);",
     "describe": {
@@ -24,6 +42,28 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "7e3d504182b08942729c86b97bd55e66734398df1ebec384bcda3a087dd56d3e": {
+    "query": "SELECT id FROM cic_messages \n        WHERE \n            victim_id = (SELECT ID from cic_victims WHERE name = $1)\n        AND payload_type = $2\n        AND payload = $3;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "9e3b54c46ca0efdfa4e86e951ff3f148ff0ec5eb841056e03e9966f2fe5f1f8b": {
@@ -75,6 +115,40 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "cb54465c6218d090c1d602ab56cb9a445cfec98b0b667c04c66ec4afbe5a26e5": {
+    "query": "INSERT INTO cic_messages (victim_id, payload_type, payload)\n        VALUES \n            ((SELECT ID from cic_victims WHERE name = $1), $2, $3);",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "dedebb020c4e1010ba5181fff00a077df36c65ca79ceb97512a0ef823c3cc8a5": {
+    "query": "SELECT response FROM cic_messages\n        WHERE id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "response",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        true
       ]
     }
   }

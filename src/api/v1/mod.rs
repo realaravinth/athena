@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-mod join;
+mod attack;
 mod ships;
 mod victim;
 
@@ -23,16 +23,19 @@ pub use ships::get_name;
 pub const ROUTES: routes::V1 = routes::V1::new();
 
 pub mod routes {
+    use super::attack::routes::Attack;
     use super::victim::routes::Victim;
 
     pub struct V1 {
         pub victim: Victim,
+        pub attack: Attack,
     }
 
     impl V1 {
         pub const fn new() -> V1 {
             V1 {
                 victim: Victim::new(),
+                attack: Attack::new(),
             }
         }
     }
@@ -67,4 +70,5 @@ pub fn get_random(len: usize) -> String {
 
 pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
     victim::services(cfg);
+    attack::services(cfg);
 }
