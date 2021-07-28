@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["athena_cic"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html\" title=\"trait core::cmp::PartialEq\">PartialEq</a>&lt;<a class=\"enum\" href=\"athena_cic/errors/enum.ServiceError.html\" title=\"enum athena_cic::errors::ServiceError\">ServiceError</a>&gt; for <a class=\"enum\" href=\"athena_cic/errors/enum.ServiceError.html\" title=\"enum athena_cic::errors::ServiceError\">ServiceError</a>","synthetic":false,"types":["athena_cic::errors::ServiceError"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
