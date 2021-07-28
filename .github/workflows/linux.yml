@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          #- 1.51.0
+          - stable
+            #  - nightly
+
+    name: ${{ matrix.version }} - x86_64-unknown-linux-gnu
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: ⚡ Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+
+      - name: Install ${{ matrix.version }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.version }}-x86_64-unknown-linux-gnu
+          profile: minimal
+          override: true
+
+
+      - name: Run migrations
+        run: make migrate
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+
+      - name: build
+        run: make
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+
+      - name: run tests
+        run: make test
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+          
+      - name: generate documentation
+        if: matrix.version == 'stable' && (github.repository == 'realaravinth/athena')
+        run: make doc
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+          GIT_HASH: 8e77345f1597e40c2e266cb4e6dee74888918a61 # dummy value
+          OPEN_API_DOCS: 8e77345f1597e40c2e266cb4e6dee74888918a61
+          COMPILED_DATE: "2021-07-21"
+
+      - name: Deploy to GitHub Pages
+        if: matrix.version == 'stable' && (github.repository == 'realaravinth/athena')
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: target/doc
