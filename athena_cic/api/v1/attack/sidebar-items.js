@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["services",""]],"mod":[["routes",""]],"struct":[["Payload",""],["PayloadID",""],["PayloadResponse",""],["Victim",""],["list_victims",""],["read_response",""],["set_payload",""]]});
