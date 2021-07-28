@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["athena_cic","tests_migrate"];

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["COMPILED_DATE",""],["GIT_COMMIT_HASH",""],["PKG_DESCRIPTION",""],["PKG_HOMEPAGE",""],["PKG_NAME",""],["VERSION",""]],"fn":[["get_identity_service",""],["get_json_err",""],["main",""]],"mod":[["data","App data: database connections, etc."],["settings",""]],"struct":[["Data","App data"],["SETTINGS",""],["Settings",""]],"type":[["AppData",""]]});
