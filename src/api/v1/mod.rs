@@ -16,20 +16,23 @@
  */
 mod join;
 mod ships;
+mod victim;
 
 pub use ships::get_name;
 
 pub const ROUTES: routes::V1 = routes::V1::new();
 
 pub mod routes {
+    use super::victim::routes::Victim;
+
     pub struct V1 {
-        pub victim_join: &'static str,
+        pub victim: Victim,
     }
 
     impl V1 {
         pub const fn new() -> V1 {
             V1 {
-                victim_join: "/api/v1/victim/join",
+                victim: Victim::new(),
             }
         }
     }
@@ -39,12 +42,13 @@ pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) {
     if let Some(_) = id.identity() {
         ()
     } else {
-        id.remember(get_name(data).await.to_string());
+        let name = get_name(data).await.to_string();
+        sqlx::query!("INSERT INTO cic_victims (name) VALUES ($1);", &name)
+            .execute(&data.db)
+            .await
+            .unwrap();
+        id.remember(name);
     }
-}
-
-pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
-    cfg.service(join::join);
 }
 
 pub fn get_random(len: usize) -> String {
@@ -59,4 +63,8 @@ pub fn get_random(len: usize) -> String {
         .map(char::from)
         .take(len)
         .collect::<String>()
+}
+
+pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
+    victim::services(cfg);
 }

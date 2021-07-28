@@ -1,5 +1,63 @@
 {
   "db": "PostgreSQL",
+  "56891344bdf70992682162660d85124270b3e1edc458e71a2a9e87e8594dda17": {
+    "query": "INSERT INTO cic_victims (name) VALUES ($1);",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "6c324f29def1d31d6a9134d4b0e7d542f448ef8efa5e18545b8f318209084af1": {
+    "query": "UPDATE cic_messages SET response = $1\n        WHERE \n            id = $2\n        AND \n            victim_id = (SELECT ID from cic_victims WHERE name = $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "9e3b54c46ca0efdfa4e86e951ff3f148ff0ec5eb841056e03e9966f2fe5f1f8b": {
+    "query": "SELECT id, payload_type, payload \n        FROM cic_messages \n        WHERE \n            victim_id = (SELECT ID from cic_victims WHERE name = $1)\n        AND response IS NULL",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "payload_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "payload",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "c3748d771ecd9505bc5224436c6117ee392f0222585ba79f881b2c7a14cfe3db": {
     "query": "SELECT EXISTS (SELECT 1 from cic_victims WHERE name = $1);",
     "describe": {

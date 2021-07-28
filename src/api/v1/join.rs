@@ -23,13 +23,3 @@ use serde::{Deserialize, Serialize};
 use super::get_random;
 //use crate::errors::*;
 use crate::AppData;
-
-#[my_codegen::post(path = "crate::V1_API_ROUTES.victim_join")]
-pub async fn join(
-    data: AppData,
-    id: Identity,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    super::join_rnner(&id, &data).await;
-    HttpResponse::Ok()
-}
