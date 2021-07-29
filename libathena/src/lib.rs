@@ -51,7 +51,7 @@ impl AthenaClientBuilder {
         if host.ends_with('/') {
             self.host = Some(host[0..host.len() - 1].to_owned())
         } else {
-            self.host = Some(host.to_owned());
+            self.host = Some(host);
         }
         self
     }

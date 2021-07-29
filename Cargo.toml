@@ -2,12 +2,12 @@
 name = "athena"
 version = "0.1.0"
 edition = "2018"
-default-run = "athena-cic"
+default-run = "athena-c2"
 build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
-name = "athena-cic"
+name = "athena-c2"
 path = "./src/main.rs"
 
 [[bin]]

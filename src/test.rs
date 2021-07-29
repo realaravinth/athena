@@ -19,7 +19,7 @@ use std::thread;
 //use std::time::Duration;
 
 use actix_web::dev::Server;
-use libathena::{payload::*, AthenaClientBuilder, Client, ClientBuilder};
+use libathena::{payload::*, AthenaClientBuilder, Client};
 
 use crate::*;
 

@@ -33,6 +33,7 @@ pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) ->
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn get_random(len: usize) -> String {
     use std::iter;
 
