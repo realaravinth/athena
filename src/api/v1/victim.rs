@@ -18,7 +18,7 @@ use actix_identity::Identity;
 use actix_web::{web, HttpResponse, Responder};
 use libathena::payload::victim::*;
 
-//use crate::errors::*;
+use crate::errors::*;
 use crate::AppData;
 
 pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
@@ -42,28 +42,20 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
 #[my_codegen::post(
     path = "crate::V1_ROUTES.victim.join.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
-async fn join(
-    data: AppData,
-    id: Identity,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    super::join_rnner(&id, &data).await;
-    HttpResponse::Ok()
+async fn join(data: AppData, id: Identity) -> ServiceResult<impl Responder> {
+    super::join_rnner(&id, &data).await?;
+    Ok(HttpResponse::Ok())
 }
 
 #[my_codegen::post(
     path = "crate::V1_ROUTES.victim.get_payload.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
-async fn get_payload(
-    data: AppData,
-    id: Identity,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    super::join_rnner(&id, &data).await;
+async fn get_payload(data: AppData, id: Identity) -> ServiceResult<impl Responder> {
+    super::join_rnner(&id, &data).await?;
 
     let name = id.identity().unwrap();
 
-    let data = sqlx::query_as!(
+    let payload = sqlx::query_as!(
         Payload,
         "SELECT id, payload_type, payload 
         FROM cic_messages 
@@ -73,17 +65,16 @@ async fn get_payload(
         &name
     )
     .fetch_all(&data.db)
-    .await
-    .unwrap();
+    .await?;
 
     let mut resp = PayloadCollection {
         payloads: Vec::new(),
     };
-    if !data.is_empty() {
-        resp.payloads = data;
+    if !payload.is_empty() {
+        resp.payloads = payload;
     }
 
-    HttpResponse::Ok().json(resp)
+    Ok(HttpResponse::Ok().json(resp))
 }
 
 #[my_codegen::post(
@@ -93,9 +84,8 @@ async fn payload_response(
     data: AppData,
     payload: web::Json<PayloadResult>,
     id: Identity,
-    //) -> ServiceResult<impl Responder> {
-) -> impl Responder {
-    super::join_rnner(&id, &data).await;
+) -> ServiceResult<impl Responder> {
+    super::join_rnner(&id, &data).await?;
 
     let name = id.identity().unwrap();
 
@@ -110,7 +100,6 @@ async fn payload_response(
         &name
     )
     .execute(&data.db)
-    .await
-    .unwrap();
-    HttpResponse::Ok()
+    .await?;
+    Ok(HttpResponse::Ok())
 }

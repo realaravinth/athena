@@ -29,6 +29,8 @@ mod api;
 mod data;
 mod errors;
 mod settings;
+#[cfg(test)]
+mod test;
 
 pub use crate::data::Data;
 pub use libathena::V1_ROUTES;

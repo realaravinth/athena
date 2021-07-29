@@ -1265,6 +1265,7 @@ name = "libathena"
 version = "0.1.0"
 dependencies = [
  "derive_builder",
+ "derive_more",
  "openssl",
  "reqwest",
  "serde 1.0.126",

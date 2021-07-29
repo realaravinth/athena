@@ -16,7 +16,7 @@
  */
 use crate::AppData;
 
-const SHIPS: [&str; 262] = [
+pub const SHIPS: [&str; 262] = [
     "Abe",
     "Ageless Warrior",
     "Aggie",
@@ -311,6 +311,6 @@ mod tests {
         let data = crate::data::Data::new().await;
         let data = actix_web::web::Data::new(data);
         let name = get_name(&data).await;
-        assert_eq!(name, SHIPS[0]);
+        assert!(SHIPS.iter().any(|ship| ship == &name));
     }
 }

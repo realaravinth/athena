@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 pub mod victim {
@@ -50,7 +51,7 @@ pub mod attack {
         pub password: String,
     }
 
-    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[derive(Clone, Builder, Debug, Serialize, Deserialize)]
     pub struct Payload {
         pub victim: String,
         pub payload_type: String,

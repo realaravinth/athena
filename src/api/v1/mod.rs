@@ -15,22 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 mod attack;
-mod ships;
+pub mod ships;
 mod victim;
+
+use crate::errors::*;
 
 pub use ships::get_name;
 
-pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) {
-    if let Some(_) = id.identity() {
-        ()
-    } else {
+pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) -> ServiceResult<()> {
+    if id.identity().is_none() {
         let name = get_name(data).await.to_string();
         sqlx::query!("INSERT INTO cic_victims (name) VALUES ($1);", &name)
             .execute(&data.db)
-            .await
-            .unwrap();
+            .await?;
         id.remember(name);
     }
+    Ok(())
 }
 
 pub fn get_random(len: usize) -> String {

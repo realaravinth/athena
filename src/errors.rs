@@ -24,7 +24,7 @@ use actix_web::{
     HttpResponse,
 };
 use derive_more::{Display, Error};
-use serde::{Deserialize, Serialize};
+use libathena::ErrorToResponse;
 
 #[derive(Debug, Display, PartialEq, Error)]
 #[cfg(not(tarpaulin_include))]
@@ -34,12 +34,6 @@ pub enum ServiceError {
 
     #[display(fmt = "Wrong password")]
     WrongPassword,
-}
-
-#[derive(Serialize, Deserialize)]
-#[cfg(not(tarpaulin_include))]
-pub struct ErrorToResponse {
-    pub error: String,
 }
 
 #[cfg(not(tarpaulin_include))]
