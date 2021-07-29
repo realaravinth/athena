@@ -27,8 +27,6 @@ async fn run_app(tx: mpsc::Sender<Server>) -> std::io::Result<()> {
     let data = Data::new().await;
     let data = actix_web::web::Data::new(data);
 
-    println!("Starting server on: http://{}", SETTINGS.server.get_ip());
-
     let srv = HttpServer::new(move || {
         App::new()
             .wrap(actix_middleware::Logger::default())
@@ -58,17 +56,17 @@ async fn run_app(tx: mpsc::Sender<Server>) -> std::io::Result<()> {
 async fn everything_works() {
     const PAYLOAD_TYPE: &str = "SHELL";
     const PAYLOAD: &str = "echo f";
+    const PAYLOAD_RESULT: &str = "f";
 
     {
         let data = crate::Data::new().await;
-        let _ = sqlx::query!("DELETE FROM cic_victims")
+        let _ = sqlx::query("DELETE FROM cic_victims")
             .execute(&data.db)
             .await;
     };
 
     let (tx, rx) = mpsc::channel();
 
-    println!("START SERVER");
     thread::spawn(move || {
         actix_rt::System::new().block_on(run_app(tx)).unwrap();
     });
@@ -109,11 +107,29 @@ async fn everything_works() {
 
     // victim gets payload
     let victim_payload = athena.victim_get_paylod().await.unwrap();
-    println!("{:?}", victim_payload.payloads);
     assert!(victim_payload
         .payloads
         .iter()
         .any(|p| p.payload_type == PAYLOAD_TYPE && p.payload == PAYLOAD));
+
+    // victim sets payload response
+    for payload in victim_payload.payloads.iter() {
+        let resp = victim::PayloadResult {
+            id: payload.id,
+            response: PAYLOAD_RESULT.into(),
+        };
+        athena.victim_set_payload_response(&resp).await.unwrap();
+    }
+
+    // attacker reads response
+    let mut responses = Vec::with_capacity(payload_ids.len());
+    for payload_id in payload_ids.iter() {
+        responses.push(athena.attack_read_response(payload_id).await.unwrap())
+    }
+
+    assert!(responses
+        .iter()
+        .any(|resp| resp.response == Some(PAYLOAD_RESULT.into())));
 
     // stop server
     srv.stop(true).await;

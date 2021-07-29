@@ -102,7 +102,7 @@ impl AthenaClient {
     pub async fn attack_read_response(
         &self,
         payload: &attack::PayloadID,
-    ) -> AthenaResult<Vec<attack::PayloadResponse>> {
+    ) -> AthenaResult<attack::PayloadResponse> {
         let payload = attack::ResponseReq {
             id: payload.id,
             password: self.get_password().to_owned(),
@@ -145,9 +145,16 @@ impl AthenaClient {
         &self,
         payload: &victim::PayloadResult,
     ) -> AthenaResult<()> {
-        let url = self.host.clone().join(V1_ROUTES.victim.get_payload)?;
-        self.client.post(url).json(payload).send().await?;
-        Ok(())
+        let url = self.host.clone().join(V1_ROUTES.victim.payload_response)?;
+        let resp = self.client.post(url).json(payload).send().await?;
+        if resp.status() == StatusCode::OK {
+            //println!("{:?}", resp.json::<serde_json::Value>().await.unwrap());
+            //unimplemented!();
+            Ok(())
+        } else {
+            let err: ErrorToResponse = resp.json().await.unwrap();
+            Err(Box::new(err))
+        }
     }
 }
 
