@@ -16,7 +16,7 @@
  */
 use actix_identity::Identity;
 use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
+use libathena::payload::victim::*;
 
 //use crate::errors::*;
 use crate::AppData;
@@ -50,18 +50,6 @@ async fn join(
     HttpResponse::Ok()
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Payload {
-    pub id: i32,
-    pub payload_type: String,
-    pub payload: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PayloadResponse {
-    payloads: Vec<Payload>,
-}
-
 #[my_codegen::post(
     path = "crate::V1_ROUTES.victim.get_payload.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
@@ -87,7 +75,7 @@ async fn get_payload(
     .await
     .unwrap();
 
-    let mut resp = PayloadResponse {
+    let mut resp = PayloadCollection {
         payloads: Vec::new(),
     };
     if !data.is_empty() {
@@ -97,18 +85,12 @@ async fn get_payload(
     HttpResponse::Ok().json(resp)
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VictimPayloadResponse {
-    pub id: i32,
-    pub response: String,
-}
-
 #[my_codegen::post(
     path = "crate::V1_ROUTES.victim.payload_response.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
 async fn payload_response(
     data: AppData,
-    payload: web::Json<VictimPayloadResponse>,
+    payload: web::Json<PayloadResult>,
     id: Identity,
     //) -> ServiceResult<impl Responder> {
 ) -> impl Responder {

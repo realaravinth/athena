@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
+use libathena::payload::attack::*;
 
 use crate::errors::*;
 use crate::AppData;
@@ -24,16 +24,6 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(list_victims);
     cfg.service(set_payload);
     cfg.service(read_response);
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Victim {
-    pub name: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Password {
-    pub password: String,
 }
 
 #[my_codegen::post(path = "crate::V1_ROUTES.attack.list_victims")]
@@ -50,19 +40,6 @@ async fn list_victims(
     } else {
         Err(ServiceError::WrongPassword)
     }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Payload {
-    pub victim: String,
-    pub payload_type: String,
-    pub payload: String,
-    pub password: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PayloadID {
-    pub id: i32,
 }
 
 #[my_codegen::post(path = "crate::V1_ROUTES.attack.read_response")]
@@ -99,17 +76,6 @@ async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResul
     } else {
         Err(ServiceError::WrongPassword)
     }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ResponseReq {
-    pub id: i32,
-    pub password: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PayloadResponse {
-    pub response: Option<String>,
 }
 
 #[my_codegen::post(path = "crate::V1_ROUTES.attack.read_response")]
