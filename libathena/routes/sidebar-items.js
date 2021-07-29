@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["V1_ROUTES",""]],"mod":[["v1",""]]});
+initSidebarItems({"constant":[["V1_ROUTES","Routes constant"]],"mod":[["v1","Routes used in version 1"]]});

