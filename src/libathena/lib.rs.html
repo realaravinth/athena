@@ -222,7 +222,7 @@
         <span class="kw">if</span> <span class="ident">host</span>.<span class="ident">ends_with</span>(<span class="string">&#39;/&#39;</span>) {
             <span class="self">self</span>.<span class="ident">host</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">host</span>[<span class="number">0</span>..<span class="ident">host</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">to_owned</span>())
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">host</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">host</span>.<span class="ident">to_owned</span>());
+            <span class="self">self</span>.<span class="ident">host</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">host</span>);
         }
         <span class="self">self</span>
     }
