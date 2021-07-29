@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["services",""]],"struct":[["Payload",""],["PayloadResponse",""],["VictimPayloadResponse",""],["get_payload",""],["join",""],["payload_response",""]]});
+initSidebarItems({"fn":[["services",""]],"struct":[["get_payload",""],["join",""],["payload_response",""]]});
