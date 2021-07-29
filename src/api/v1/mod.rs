@@ -20,27 +20,6 @@ mod victim;
 
 pub use ships::get_name;
 
-pub const ROUTES: routes::V1 = routes::V1::new();
-
-pub mod routes {
-    use super::attack::routes::Attack;
-    use super::victim::routes::Victim;
-
-    pub struct V1 {
-        pub victim: Victim,
-        pub attack: Attack,
-    }
-
-    impl V1 {
-        pub const fn new() -> V1 {
-            V1 {
-                victim: Victim::new(),
-                attack: Attack::new(),
-            }
-        }
-    }
-}
-
 pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) {
     if let Some(_) = id.identity() {
         ()

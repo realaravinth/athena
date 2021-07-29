@@ -31,7 +31,7 @@ mod errors;
 mod settings;
 
 pub use crate::data::Data;
-pub use api::v1::ROUTES as V1_API_ROUTES;
+pub use libathena::V1_ROUTES;
 pub use settings::Settings;
 
 lazy_static! {

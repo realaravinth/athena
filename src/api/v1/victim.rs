@@ -21,26 +21,6 @@ use serde::{Deserialize, Serialize};
 //use crate::errors::*;
 use crate::AppData;
 
-pub mod routes {
-    pub struct Victim {
-        pub join: &'static str,
-        pub get_payload: &'static str,
-        pub payload_response: &'static str,
-        pub scope: &'static str,
-    }
-
-    impl Victim {
-        pub const fn new() -> Victim {
-            Victim {
-                join: "/api/v1/victim/join",
-                get_payload: "/api/v1/victim/payload/get",
-                payload_response: "/api/v1/victim/payload/response",
-                scope: "/api/v1/victim/",
-            }
-        }
-    }
-}
-
 pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
     use actix_web::*;
     let cors = actix_cors::Cors::default()
@@ -51,7 +31,7 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
         .send_wildcard();
 
     cfg.service(
-        Scope::new(crate::V1_API_ROUTES.victim.scope)
+        Scope::new(crate::V1_ROUTES.victim.scope)
             .wrap(cors)
             .service(join)
             .service(get_payload),
@@ -59,7 +39,7 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
 }
 
 #[my_codegen::post(
-    path = "crate::V1_API_ROUTES.victim.join.strip_prefix(crate::V1_API_ROUTES.victim.scope).unwrap()"
+    path = "crate::V1_ROUTES.victim.join.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
 async fn join(
     data: AppData,
@@ -83,7 +63,7 @@ pub struct PayloadResponse {
 }
 
 #[my_codegen::post(
-    path = "crate::V1_API_ROUTES.victim.get_payload.strip_prefix(crate::V1_API_ROUTES.victim.scope).unwrap()"
+    path = "crate::V1_ROUTES.victim.get_payload.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
 async fn get_payload(
     data: AppData,
@@ -124,7 +104,7 @@ pub struct VictimPayloadResponse {
 }
 
 #[my_codegen::post(
-    path = "crate::V1_API_ROUTES.victim.payload_response.strip_prefix(crate::V1_API_ROUTES.victim.scope).unwrap()"
+    path = "crate::V1_ROUTES.victim.payload_response.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()"
 )]
 async fn payload_response(
     data: AppData,
