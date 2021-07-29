@@ -91,9 +91,9 @@ impl Settings {
             .expect("Couldn't get the number of CPUs");
 
         const CURRENT_DIR: &str = "./config/default.toml";
-        const ETC: &str = "/etc/mcaptcha/config.toml";
+        const ETC: &str = "/etc/athena/config.toml";
 
-        if let Ok(path) = env::var("MCAPTCHA_CONFIG") {
+        if let Ok(path) = env::var("ATHENA_CONFIG") {
             s.merge(File::with_name(&path))?;
         } else if Path::new(CURRENT_DIR).exists() {
             // merging default config from file
@@ -104,7 +104,7 @@ impl Settings {
             log::warn!("configuration file not found");
         }
 
-        s.merge(Environment::with_prefix("MCAPTCHA").separator("_"))?;
+        s.merge(Environment::with_prefix("ATHENA").separator("_"))?;
 
         check_url(&s);
 
