@@ -116,6 +116,7 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
+<span id="116">116</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -153,6 +154,7 @@
         <span class="ident">Scope::new</span>(<span class="kw">crate</span><span class="ident">::V1_ROUTES</span>.<span class="ident">victim</span>.<span class="ident">scope</span>)
             .<span class="ident">wrap</span>(<span class="ident">cors</span>)
             .<span class="ident">service</span>(<span class="ident">join</span>)
+            .<span class="ident">service</span>(<span class="ident">payload_response</span>)
             .<span class="ident">service</span>(<span class="ident">get_payload</span>),
     );
 }
