@@ -2,7 +2,7 @@
 <h1> Athena </h1>
 <p>
 
-**HTTP based framework to build
+**HTTP based framework for building
 [C2](https://en.wikipedia.org/wiki/Command_and_control) for
 [RATs](https://en.wikipedia.org/?title=Remote_access_trojan)**
 
