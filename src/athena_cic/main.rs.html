@@ -109,6 +109,8 @@
 <span id="106">106</span>
 <span id="107">107</span>
 <span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -141,6 +143,8 @@
 <span class="kw">mod</span> <span class="ident">data</span>;
 <span class="kw">mod</span> <span class="ident">errors</span>;
 <span class="kw">mod</span> <span class="ident">settings</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">test</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::Data</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">libathena::V1_ROUTES</span>;

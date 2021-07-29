@@ -106,17 +106,6 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
-<span id="106">106</span>
-<span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -138,7 +127,7 @@
 <span class="kw">use</span> <span class="ident">actix_web</span>::{<span class="ident">web</span>, <span class="ident">HttpResponse</span>, <span class="ident">Responder</span>};
 <span class="kw">use</span> <span class="ident">libathena::payload::victim</span>::<span class="kw-2">*</span>;
 
-<span class="comment">//use crate::errors::*;</span>
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::errors</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::AppData</span>;
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">services</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">actix_web::web::ServiceConfig</span>) {
@@ -162,28 +151,20 @@
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
     <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_ROUTES.victim.join.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()&quot;</span>
 )]</span>
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">join</span>(
-    <span class="ident">data</span>: <span class="ident">AppData</span>,
-    <span class="ident">id</span>: <span class="ident">Identity</span>,
-    <span class="comment">//) -&gt; ServiceResult&lt;impl Responder&gt; {</span>
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Responder</span> {
-    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span>;
-    <span class="ident">HttpResponse::Ok</span>()
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">join</span>(<span class="ident">data</span>: <span class="ident">AppData</span>, <span class="ident">id</span>: <span class="ident">Identity</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>())
 }
 
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
     <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_ROUTES.victim.get_payload.strip_prefix(crate::V1_ROUTES.victim.scope).unwrap()&quot;</span>
 )]</span>
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_payload</span>(
-    <span class="ident">data</span>: <span class="ident">AppData</span>,
-    <span class="ident">id</span>: <span class="ident">Identity</span>,
-    <span class="comment">//) -&gt; ServiceResult&lt;impl Responder&gt; {</span>
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Responder</span> {
-    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span>;
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_payload</span>(<span class="ident">data</span>: <span class="ident">AppData</span>, <span class="ident">id</span>: <span class="ident">Identity</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">identity</span>().<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="macro">sqlx::query_as!</span>(
+    <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="macro">sqlx::query_as!</span>(
         <span class="ident">Payload</span>,
         <span class="string">&quot;SELECT id, payload_type, payload 
         FROM cic_messages 
@@ -193,17 +174,16 @@
         <span class="kw-2">&amp;</span><span class="ident">name</span>
     )
     .<span class="ident">fetch_all</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">db</span>)
-    .<span class="kw">await</span>
-    .<span class="ident">unwrap</span>();
+    .<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">PayloadCollection</span> {
         <span class="ident">payloads</span>: <span class="ident">Vec::new</span>(),
     };
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">data</span>.<span class="ident">is_empty</span>() {
-        <span class="ident">resp</span>.<span class="ident">payloads</span> <span class="op">=</span> <span class="ident">data</span>;
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">payload</span>.<span class="ident">is_empty</span>() {
+        <span class="ident">resp</span>.<span class="ident">payloads</span> <span class="op">=</span> <span class="ident">payload</span>;
     }
 
-    <span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">resp</span>)
+    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">resp</span>))
 }
 
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
@@ -213,9 +193,8 @@
     <span class="ident">data</span>: <span class="ident">AppData</span>,
     <span class="ident">payload</span>: <span class="ident">web::Json</span><span class="op">&lt;</span><span class="ident">PayloadResult</span><span class="op">&gt;</span>,
     <span class="ident">id</span>: <span class="ident">Identity</span>,
-    <span class="comment">//) -&gt; ServiceResult&lt;impl Responder&gt; {</span>
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Responder</span> {
-    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span>;
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">super</span><span class="ident">::join_rnner</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">identity</span>().<span class="ident">unwrap</span>();
 
@@ -230,9 +209,8 @@
         <span class="kw-2">&amp;</span><span class="ident">name</span>
     )
     .<span class="ident">execute</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">db</span>)
-    .<span class="kw">await</span>
-    .<span class="ident">unwrap</span>();
-    <span class="ident">HttpResponse::Ok</span>()
+    .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>())
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="athena_cic" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>

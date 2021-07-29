@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Password",""],["Payload",""],["PayloadID",""],["PayloadResponse",""],["ResponseReq",""],["Victim",""]]});
+initSidebarItems({"enum":[["PayloadBuilderError","Error type for PayloadBuilder"]],"struct":[["Password",""],["Payload",""],["PayloadBuilder","Builder for `Payload`."],["PayloadID",""],["PayloadResponse",""],["ResponseReq",""],["Victim",""]]});
