@@ -14,10 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+//! Routes available on the C2 server
+
+/// Routes constant
 pub const V1_ROUTES: v1::V1 = v1::V1::new();
 
 pub mod v1 {
-
+    //! Routes used in version 1
     pub struct V1 {
         pub victim: Victim,
         pub attack: Attack,

