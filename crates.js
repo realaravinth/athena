@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["athena_cic","tests_migrate"];
+window.ALL_CRATES = ["athena_cic","libathena","tests_migrate"];
