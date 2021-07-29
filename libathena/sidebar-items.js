@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["payload",""],["routes",""]],"struct":[["AthenaClient",""],["AthenaClientBuilder",""]]});
+initSidebarItems({"mod":[["payload",""],["routes",""]],"struct":[["AthenaClient",""],["AthenaClientBuilder",""]],"type":[["AthenaResult",""]]});
