@@ -34,6 +34,7 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
         Scope::new(crate::V1_ROUTES.victim.scope)
             .wrap(cors)
             .service(join)
+            .service(payload_response)
             .service(get_payload),
     );
 }

