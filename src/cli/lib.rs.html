@@ -160,6 +160,8 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
 </pre><pre class="rust">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -237,6 +239,7 @@
     <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">Mode</span>,
     <span class="kw">pub</span> <span class="ident">client</span>: <span class="ident">AthenaClient</span>,
     <span class="kw">pub</span> <span class="ident">victims</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">attack::Victim</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">editor</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
@@ -257,6 +260,7 @@
             <span class="ident">mode</span>,
             <span class="ident">client</span>,
             <span class="ident">victims</span>,
+            <span class="ident">editor</span>: <span class="ident">options</span>.<span class="ident">editor</span>.<span class="ident">clone</span>(),
         })
     }
 
