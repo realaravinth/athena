@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use std::io::{BufWriter, Write};
+use std::io::{stdin, BufWriter, Write};
 
 use libathena::{payload::attack, AthenaClient, AthenaClientBuilder, AthenaResult, Client};
 
@@ -36,6 +36,37 @@ pub enum Mode {
     Default,
     TargetAll,
     Shell,
+    Exit,
+}
+
+impl Mode {
+    pub fn print_and_read<W: Write>(&self, s: &mut State<W>, i: &mut String) -> CliResult<()> {
+        match self {
+            Self::Default => {
+                s.default_prompt()?;
+                Self::read_input(i)?;
+            }
+
+            Self::Shell => {
+                s.shell_prompt()?;
+                Self::read_input(i)?;
+            }
+
+            Self::TargetAll => {
+                s.targetall_prompt()?;
+                Self::read_input(i)?;
+            }
+
+            Self::Exit => (),
+        }
+        Ok(())
+    }
+
+    fn read_input(input: &mut String) -> CliResult<()> {
+        input.clear();
+        stdin().read_line(input)?;
+        Ok(())
+    }
 }
 
 pub struct State<W: Write> {
@@ -97,6 +128,35 @@ Be nice."#,
     pub fn targetall_prompt(&mut self) -> CliResult<()> {
         write!(self.write, "{}{}", DEFAULT_PROMPT, TARGET_ALL)?;
         self.write.flush()?;
+        Ok(())
+    }
+
+    pub fn list_victims(&mut self) -> CliResult<()> {
+        if self.victims.is_empty() {
+            writeln!(self.write, "No victims on C2 server")?;
+        } else {
+            writeln!(self.write, "Victims")?;
+            writeln!(self.write, "=======")?;
+            for (count, victim) in self.victims.iter().enumerate() {
+                writeln!(self.write, "[{}] {}", count, victim.name)?;
+            }
+            writeln!(self.write, "Pick a victim")?;
+        }
+        self.write.flush()?;
+        Ok(())
+    }
+
+    pub fn select_victim(&mut self, input: &mut String) -> CliResult<()> {
+        self.list_victims()?;
+        self.mode.clone().print_and_read(self, input)?;
+        let mut victims = Vec::with_capacity(1);
+        victims.push(
+            self.victims
+                .get(input.trim().parse::<usize>().unwrap())
+                .unwrap()
+                .to_owned(),
+        );
+        self.victims = victims;
         Ok(())
     }
 }

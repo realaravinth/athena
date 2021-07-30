@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::error::Error;
-use std::io::{stdin, stdout};
+use std::io::stdout;
 
 use clap::Clap;
 
+use cli::handlers::*;
 use cli::{commands::Commands, options::Options, Mode, State};
 
 #[tokio::main]
@@ -33,21 +34,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         match s.mode {
             Mode::Default => {
-                input.clear();
-                s.default_prompt()?;
-                stdin().read_line(&mut input)?;
-                let cmd = Commands::parse(&input)?;
-                cmd.set_mode(&mut s.mode);
-                if s.mode == Mode::Default {
-                    break;
-                }
-
+                s.mode.clone().print_and_read(&mut s, &mut input)?;
+                let cmd = Commands::read_and_parse(&mut s, &mut input)?;
                 if cmd == Commands::SelectVictim {
                     s.refresh_victims().await?;
+                    s.select_victim(&mut input)?;
+                    s.mode.clone().print_and_read(&mut s, &mut input)?;
+                    let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+                    if cmd == Commands::JavaScript {
+                        javascript(&mut s).await?;
+                    }
                 }
             }
             Mode::Shell => s.shell_prompt()?,
             Mode::TargetAll => s.targetall_prompt()?,
+            Mode::Exit => {
+                println!("Bye!");
+                break;
+            }
         };
     }
 

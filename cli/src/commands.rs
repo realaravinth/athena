@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use crate::Mode;
+use std::io::Write;
 
 use crate::errors::*;
+use crate::Mode;
+use crate::State;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Commands {
@@ -63,6 +65,8 @@ impl Commands {
         set_mode!(self, Self::MultipleVictims, Mode::TargetAll, mode);
         if *mode != Mode::Default {
             set_mode!(self, Self::Exit, Mode::Default, mode);
+        } else {
+            set_mode!(self, Self::Exit, Mode::Exit, mode);
         }
     }
 
@@ -78,6 +82,12 @@ impl Commands {
         derive_parse!(Self::Exit, cmd);
 
         Err(CliErrors::CommandNotFound)
+    }
+
+    pub fn read_and_parse<W: Write>(s: &mut State<W>, input: &mut String) -> CliResult<Self> {
+        let cmd = Commands::parse(&input)?;
+        cmd.set_mode(&mut s.mode);
+        Ok(cmd)
     }
 }
 
