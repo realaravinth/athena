@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Commands",""],["Mode",""]],"mod":[["errors",""],["options",""]],"type":[["CliResult",""]]});
+initSidebarItems({"constant":[["VERSION",""]],"enum":[["Mode",""]],"mod":[["commands",""],["errors",""],["handlers",""],["options",""]],"struct":[["State",""]]});

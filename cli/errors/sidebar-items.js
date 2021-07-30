@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CliErrors",""]]});
+initSidebarItems({"enum":[["CliErrors",""]],"struct":[["EnvVarError",""]],"type":[["CliResult",""]]});
