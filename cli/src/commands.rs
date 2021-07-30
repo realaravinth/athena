@@ -131,6 +131,6 @@ mod tests {
         mode_command_conv!(Commands::MultipleVictims, mode, Mode::TargetAll);
         mode_command_conv!(Commands::Shell, mode, Mode::Shell);
         mode_command_conv!(Commands::Exit, mode, Mode::Default);
-        mode_command_conv!(Commands::Exit, mode, Mode::Default);
+        mode_command_conv!(Commands::Exit, mode, Mode::Exit);
     }
 }

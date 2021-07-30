@@ -15,22 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-    use clap::*;
+use clap::*;
 
-    /// Athena command and control CLI tool
-    #[derive(Clap, Clone, Debug)]
-    #[clap(
-        name = "anthena-cli",
-        author = "Aravinth Manivannan <realaravinth@batsense.net>",
-        version = "0.1.0"
-    )]
-    pub struct Options {
-        /// Password to login to C2 server
-        #[clap(short, long)]
-        pub password: String,
+/// Athena command and control CLI tool
+#[derive(Clap, Clone, Debug)]
+#[clap(
+    name = "anthena-cli",
+    author = "Aravinth Manivannan <realaravinth@batsense.net>",
+    version = "0.1.0"
+)]
+pub struct Options {
+    /// Password to login to C2 server
+    #[clap(short, long)]
+    pub password: String,
 
-        /// C2 server URL
-        #[clap(short, long)]
-        pub c2: String,
-    }
-
+    /// C2 server URL
+    #[clap(short, long)]
+    pub c2: String,
+}

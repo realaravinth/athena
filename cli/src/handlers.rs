@@ -34,11 +34,20 @@ pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<Vec<PayloadID>>
         })
     })?;
 
+    let shell = var("SHELL").map_err(|_| {
+        CliErrors::EnvVarError(EnvVarError {
+            var: "SHELL".into(),
+            preference: "shell".into(),
+        })
+    })?;
+
     let dir = tempdir()?;
 
     let file_path = dir.path().join(FILE_NAME);
 
-    let mut editor_program = Command::new(&editor)
+    let mut editor_program = Command::new(&shell)
+        .arg("-c")
+        .arg(&editor)
         .arg(&file_path)
         .spawn()
         .unwrap_or_else(|_| panic!("Unable to launch editor {}", &editor));
