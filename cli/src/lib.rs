@@ -90,8 +90,8 @@ impl<W: Write> State<W> {
         let victims = client.attack_list_victims().await?;
 
         Ok(Self {
-            mode,
             write,
+            mode,
             client,
             victims,
         })
@@ -149,13 +149,11 @@ Be nice."#,
     pub fn select_victim(&mut self, input: &mut String) -> CliResult<()> {
         self.list_victims()?;
         self.mode.clone().print_and_read(self, input)?;
-        let mut victims = Vec::with_capacity(1);
-        victims.push(
-            self.victims
-                .get(input.trim().parse::<usize>().unwrap())
-                .unwrap()
-                .to_owned(),
-        );
+        let victims = vec![self
+            .victims
+            .get(input.trim().parse::<usize>().unwrap())
+            .unwrap()
+            .to_owned()];
         self.victims = victims;
         Ok(())
     }
