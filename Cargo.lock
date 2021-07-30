@@ -539,6 +539,7 @@ dependencies = [
  "openssl",
  "serde 1.0.126",
  "serde_json",
+ "tempfile",
  "tokio",
 ]
 

