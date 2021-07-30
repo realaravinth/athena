@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CliErrors",""],["Commands",""]],"fn":[["main",""]],"mod":[["options",""]],"type":[["CliResult",""]]});
+initSidebarItems({"enum":[["Commands",""],["Mode",""]],"mod":[["errors",""],["options",""]],"type":[["CliResult",""]]});
