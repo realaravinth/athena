@@ -32,4 +32,8 @@ pub struct Options {
     /// C2 server URL
     #[clap(short, long)]
     pub c2: String,
+
+    /// preferred text editor
+    #[clap(short, long)]
+    pub editor: Option<String>,
 }

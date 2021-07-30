@@ -27,27 +27,22 @@ use crate::{errors::*, State};
 pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<Vec<PayloadID>> {
     const FILE_NAME: &str = "payload.js";
 
-    let editor = var("EDITOR").map_err(|_| {
-        CliErrors::EnvVarError(EnvVarError {
-            var: "EDITOR".into(),
-            preference: "editor".into(),
-        })
-    })?;
-
-    let shell = var("SHELL").map_err(|_| {
-        CliErrors::EnvVarError(EnvVarError {
-            var: "SHELL".into(),
-            preference: "shell".into(),
-        })
-    })?;
+    let editor = if s.editor.is_some() {
+        s.editor.clone().unwrap()
+    } else {
+        var("EDITOR").map_err(|_| {
+            CliErrors::EnvVarError(EnvVarError {
+                var: "EDITOR".into(),
+                preference: "editor".into(),
+            })
+        })?
+    };
 
     let dir = tempdir()?;
 
     let file_path = dir.path().join(FILE_NAME);
 
-    let mut editor_program = Command::new(&shell)
-        .arg("-c")
-        .arg(&editor)
+    let mut editor_program = Command::new(&editor)
         .arg(&file_path)
         .spawn()
         .unwrap_or_else(|_| panic!("Unable to launch editor {}", &editor));

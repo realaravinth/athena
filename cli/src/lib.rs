@@ -74,6 +74,7 @@ pub struct State<W: Write> {
     pub mode: Mode,
     pub client: AthenaClient,
     pub victims: Vec<attack::Victim>,
+    pub editor: Option<String>,
 }
 
 impl<W: Write> State<W> {
@@ -94,6 +95,7 @@ impl<W: Write> State<W> {
             mode,
             client,
             victims,
+            editor: options.editor.clone(),
         })
     }
 
