@@ -33,7 +33,7 @@ run:
 	cargo run
 
 test:
-	cargo test --all-features --no-fail-fast
+	cargo test --all-features --no-fail-fast --all
 
 xml-test-coverage: migrate
 	cargo tarpaulin -t 1200 --out Xml

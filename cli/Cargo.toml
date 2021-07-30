@@ -2,6 +2,13 @@
 name = "cli"
 version = "0.1.0"
 edition = "2018"
+description = "HTTP based framework for building command and control components for remote access trojans"
+homepage = "https://github.com/realaravinth/athena"
+repository = "https://github.com/realaravinth/athena"
+documentation = "https://github.con/realaravinth/athena"
+readme = "https://github.com/realaravinth/athena/blob/master/README.md"
+license = "AGPLv3 or later version"
+authors = ["realaravinth <realaravinth@batsense.net>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

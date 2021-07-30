@@ -15,91 +15,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::error::Error;
+use std::io::{stdin, stdout, BufWriter, Write};
 
 use clap::Clap;
-use derive_more::{Display, Error};
 use libathena::{AthenaClientBuilder, Client};
-use serde::{Deserialize, Serialize};
 
-mod options {
-    use clap::*;
+use cli::options::Options;
+use cli::Commands;
+use cli::Mode;
 
-    /// Athena command and control CLI tool
-    #[derive(Clap, Clone, Debug)]
-    #[clap(
-        name = "anthena-cli",
-        author = "Aravinth Manivannan <realaravinth@batsense.net>",
-        version = "0.1.0"
-    )]
-    pub struct Options {
-        /// Password to login to C2 server
-        #[clap(short, long)]
-        pub password: String,
+const DEFAULT_PROMPT: &str = "(athena)";
+const SHELL_PROMPT: &str = "(shell)";
+const TARGET_ALL: &str = "(all)";
 
-        /// C2 server URL
-        #[clap(short, long)]
-        pub c2: String,
-    }
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const PKG_HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
+
+fn welcome<W: Write>(handle: &mut BufWriter<W>) -> Result<(), Box<dyn Error>> {
+    write!(
+        handle,
+        r#"Athena {} - C2 for Rats
+Aravinth Mavnivannan<realaravinth@batsense.net>
+{}
+Disclaimer: This software is not authorized for use in committing computer fraud.
+The authors of this software CAN NOT be held responsible for the program's users' actions
+
+"#,
+        VERSION, PKG_HOMEPAGE,
+    )?;
+    Ok(())
 }
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-enum Commands {
-    ListVictims,
-    SelectVictim,
-    MultipleVictims,
-    JavaScript,
-    Shell,
-    Help,
-    Exit,
-}
-
-macro_rules! derive_parse {
-    ($item:expr, $cmd:expr) => {
-        if $cmd == $item.get_val() {
-            return Ok($item);
-        };
-    };
-}
-
-impl Commands {
-    fn get_val(&self) -> &'static str {
-        match self {
-            Self::ListVictims => "lsv",
-            Self::SelectVictim => "select",
-            Self::MultipleVictims => "multi",
-            Self::JavaScript => "js",
-            Self::Shell => "sh",
-            Self::Help => "help",
-            Self::Exit => "exit",
-        }
-    }
-
-    fn parse(cmd: &str) -> CliResult<Self> {
-        let cmd = cmd.trim();
-
-        derive_parse!(Self::ListVictims, cmd);
-        derive_parse!(Self::SelectVictim, cmd);
-        derive_parse!(Self::MultipleVictims, cmd);
-        derive_parse!(Self::JavaScript, cmd);
-        derive_parse!(Self::Shell, cmd);
-        derive_parse!(Self::Help, cmd);
-        derive_parse!(Self::Exit, cmd);
-
-        Err(CliErrors::CommandNotFound)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Error, Display)]
-enum CliErrors {
-    #[display(fmt = "Command not found")]
-    CommandNotFound,
-}
-
-type CliResult<T> = Result<T, CliErrors>;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let options = options::Options::parse();
+    let options = Options::parse();
 
     AthenaClientBuilder::default()
         .client(Client::builder())?
@@ -107,33 +56,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .host(options.c2)
         .build()?;
 
-    Ok(())
-}
+    let mut input = String::new();
+    let mut mode = Mode::Default;
+    let stdout = stdout(); // get the global stdout entity
+    let mut handle = BufWriter::new(stdout);
+    welcome(&mut handle)?;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    macro_rules! get_val_tests {
-        ($enum:expr, $val:expr) => {
-            assert_eq!($enum.get_val(), $val);
-            assert_eq!(Commands::parse($val).unwrap(), $enum);
+    loop {
+        match mode {
+            Mode::Default => {
+                input.clear();
+                write!(handle, "{} => ", DEFAULT_PROMPT)?;
+                handle.flush()?;
+                stdin().read_line(&mut input)?;
+                let cmd = Commands::parse(&input)?;
+                cmd.set_mode(&mut mode);
+                if mode == Mode::Default {
+                    break;
+                }
+            }
+            Mode::Shell => print!("{}{}", DEFAULT_PROMPT, SHELL_PROMPT),
+            Mode::TargetAll => print!("{}{}", DEFAULT_PROMPT, TARGET_ALL),
         };
     }
 
-    #[test]
-    fn commands_work() {
-        get_val_tests!(Commands::ListVictims, "lsv");
-        get_val_tests!(Commands::SelectVictim, "select");
-        get_val_tests!(Commands::MultipleVictims, "multi");
-        get_val_tests!(Commands::JavaScript, "js");
-        get_val_tests!(Commands::Shell, "sh");
-        get_val_tests!(Commands::Help, "help");
-        get_val_tests!(Commands::Exit, "exit");
-
-        assert_eq!(
-            Commands::parse("commanddoesntexist").err().unwrap(),
-            CliErrors::CommandNotFound
-        );
-    }
+    Ok(())
 }
