@@ -35,7 +35,6 @@
 <span id="33">33</span>
 <span id="34">34</span>
 <span id="35">35</span>
-<span id="36">36</span>
 </pre><pre class="rust">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -54,24 +53,23 @@
  * along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
  */</span>
 
-    <span class="kw">use</span> <span class="ident">clap</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">clap</span>::<span class="kw-2">*</span>;
 
-    <span class="doccomment">/// Athena command and control CLI tool</span>
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clap</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-    <span class="attribute">#[<span class="ident">clap</span>(
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;anthena-cli&quot;</span>,
-        <span class="ident">author</span> <span class="op">=</span> <span class="string">&quot;Aravinth Manivannan &lt;realaravinth@batsense.net&gt;&quot;</span>,
-        <span class="ident">version</span> <span class="op">=</span> <span class="string">&quot;0.1.0&quot;</span>
-    )]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span> {
-        <span class="doccomment">/// Password to login to C2 server</span>
-        <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
-        <span class="kw">pub</span> <span class="ident">password</span>: <span class="ident">String</span>,
+<span class="doccomment">/// Athena command and control CLI tool</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clap</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">clap</span>(
+    <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;anthena-cli&quot;</span>,
+    <span class="ident">author</span> <span class="op">=</span> <span class="string">&quot;Aravinth Manivannan &lt;realaravinth@batsense.net&gt;&quot;</span>,
+    <span class="ident">version</span> <span class="op">=</span> <span class="string">&quot;0.1.0&quot;</span>
+)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span> {
+    <span class="doccomment">/// Password to login to C2 server</span>
+    <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">password</span>: <span class="ident">String</span>,
 
-        <span class="doccomment">/// C2 server URL</span>
-        <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
-        <span class="kw">pub</span> <span class="ident">c2</span>: <span class="ident">String</span>,
-    }
-
+    <span class="doccomment">/// C2 server URL</span>
+    <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">c2</span>: <span class="ident">String</span>,
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cli" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
