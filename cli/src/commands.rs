@@ -52,7 +52,7 @@ impl Commands {
         match self {
             Self::ListVictims => "lsv",
             Self::SelectVictim => "select",
-            Self::MultipleVictims => "multi",
+            Self::MultipleVictims => "all",
             Self::JavaScript => "js",
             Self::Shell => "sh",
             Self::Help => "help",
@@ -113,7 +113,7 @@ mod tests {
     fn commands_work() {
         get_val_tests!(Commands::ListVictims, "lsv");
         get_val_tests!(Commands::SelectVictim, "select");
-        get_val_tests!(Commands::MultipleVictims, "multi");
+        get_val_tests!(Commands::MultipleVictims, "all");
         get_val_tests!(Commands::JavaScript, "js");
         get_val_tests!(Commands::Shell, "sh");
         get_val_tests!(Commands::Help, "help");
