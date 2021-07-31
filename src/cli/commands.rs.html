@@ -191,7 +191,7 @@
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="self">Self</span><span class="ident">::ListVictims</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lsv&quot;</span>,
             <span class="self">Self</span><span class="ident">::SelectVictim</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;select&quot;</span>,
-            <span class="self">Self</span><span class="ident">::MultipleVictims</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;multi&quot;</span>,
+            <span class="self">Self</span><span class="ident">::MultipleVictims</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;all&quot;</span>,
             <span class="self">Self</span><span class="ident">::JavaScript</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;js&quot;</span>,
             <span class="self">Self</span><span class="ident">::Shell</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;sh&quot;</span>,
             <span class="self">Self</span><span class="ident">::Help</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;help&quot;</span>,
@@ -252,7 +252,7 @@
     <span class="kw">fn</span> <span class="ident">commands_work</span>() {
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::ListVictims</span>, <span class="string">&quot;lsv&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::SelectVictim</span>, <span class="string">&quot;select&quot;</span>);
-        <span class="macro">get_val_tests!</span>(<span class="ident">Commands::MultipleVictims</span>, <span class="string">&quot;multi&quot;</span>);
+        <span class="macro">get_val_tests!</span>(<span class="ident">Commands::MultipleVictims</span>, <span class="string">&quot;all&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::JavaScript</span>, <span class="string">&quot;js&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::Shell</span>, <span class="string">&quot;sh&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::Help</span>, <span class="string">&quot;help&quot;</span>);

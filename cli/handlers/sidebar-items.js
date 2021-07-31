@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["javascript",""]]});
+initSidebarItems({"fn":[["javascript",""],["shell",""]]});
