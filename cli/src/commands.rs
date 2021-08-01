@@ -31,23 +31,8 @@ pub enum Commands {
     Exit,
 }
 
-macro_rules! derive_parse {
-    ($item:expr, $cmd:expr) => {
-        if $cmd == $item.get_val() {
-            return Ok($item);
-        };
-    };
-}
-
-macro_rules! set_mode {
-    ($self:expr, $option:expr, $mode:expr, $val:expr) => {
-        if *$self == $option {
-            return *$val = $mode;
-        };
-    };
-}
-
 impl Commands {
+    /// get matching user input for Self
     pub fn get_val(&self) -> &'static str {
         match self {
             Self::ListVictims => "lsv",
@@ -60,7 +45,16 @@ impl Commands {
         }
     }
 
+    /// set mode when a command is received
     pub fn set_mode(&self, mode: &mut Mode) {
+        macro_rules! set_mode {
+            ($self:expr, $option:expr, $mode:expr, $val:expr) => {
+                if *$self == $option {
+                    return *$val = $mode;
+                };
+            };
+        }
+
         set_mode!(self, Self::Shell, Mode::Shell, mode);
         set_mode!(self, Self::MultipleVictims, Mode::TargetAll, mode);
         if *mode != Mode::Default {
@@ -70,7 +64,16 @@ impl Commands {
         }
     }
 
+    /// Parse user input and to get Self
     pub fn parse(cmd: &str) -> CliResult<Self> {
+        macro_rules! derive_parse {
+            ($item:expr, $cmd:expr) => {
+                if $cmd == $item.get_val() {
+                    return Ok($item);
+                };
+            };
+        }
+
         let cmd = cmd.trim();
 
         derive_parse!(Self::ListVictims, cmd);
@@ -84,7 +87,8 @@ impl Commands {
         Err(CliErrors::CommandNotFound)
     }
 
-    pub fn read_and_parse<W: Write>(s: &mut State<W>, input: &mut String) -> CliResult<Self> {
+    /// runner command that parses input and sets mode
+    pub fn parse_and_set_mode<W: Write>(s: &mut State<W>, input: &mut String) -> CliResult<Self> {
         let cmd = Commands::parse(&input)?;
         cmd.set_mode(&mut s.mode);
         Ok(cmd)
@@ -95,22 +99,15 @@ impl Commands {
 mod tests {
     use super::*;
 
-    macro_rules! get_val_tests {
-        ($enum:expr, $val:expr) => {
-            assert_eq!($enum.get_val(), $val);
-            assert_eq!(Commands::parse($val).unwrap(), $enum);
-        };
-    }
-
-    macro_rules! mode_command_conv {
-        ($cmd:expr, $mode:expr, $expected_mode:expr) => {
-            $cmd.set_mode(&mut $mode);
-            assert_eq!($mode, $expected_mode);
-        };
-    }
-
     #[test]
     fn commands_work() {
+        macro_rules! get_val_tests {
+            ($enum:expr, $val:expr) => {
+                assert_eq!($enum.get_val(), $val);
+                assert_eq!(Commands::parse($val).unwrap(), $enum);
+            };
+        }
+
         get_val_tests!(Commands::ListVictims, "lsv");
         get_val_tests!(Commands::SelectVictim, "select");
         get_val_tests!(Commands::MultipleVictims, "all");
@@ -127,6 +124,13 @@ mod tests {
 
     #[test]
     fn set_mode_works() {
+        macro_rules! mode_command_conv {
+            ($cmd:expr, $mode:expr, $expected_mode:expr) => {
+                $cmd.set_mode(&mut $mode);
+                assert_eq!($mode, $expected_mode);
+            };
+        }
+
         let mut mode = Mode::Default;
         mode_command_conv!(Commands::MultipleVictims, mode, Mode::TargetAll);
         mode_command_conv!(Commands::Shell, mode, Mode::Shell);
