@@ -136,6 +136,10 @@
 <span id="134">134</span>
 <span id="135">135</span>
 <span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
 </pre><pre class="rust">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -170,23 +174,8 @@
     <span class="ident">Exit</span>,
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">derive_parse</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>.<span class="ident">get_val</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>);
-        };
-    };
-}
-
-<span class="macro">macro_rules!</span> <span class="ident">set_mode</span> {
-    (<span class="macro-nonterminal">$</span><span class="self">self</span>:<span class="macro-nonterminal">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="macro-nonterminal">$</span><span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span> {
-            <span class="kw">return</span> <span class="kw-2">*</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>;
-        };
-    };
-}
-
 <span class="kw">impl</span> <span class="ident">Commands</span> {
+    <span class="doccomment">/// get matching user input for Self</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_val</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="self">Self</span><span class="ident">::ListVictims</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lsv&quot;</span>,
@@ -199,7 +188,16 @@
         }
     }
 
+    <span class="doccomment">/// set mode when a command is received</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mode</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Mode</span>) {
+        <span class="macro">macro_rules!</span> <span class="ident">set_mode</span> {
+            (<span class="macro-nonterminal">$</span><span class="self">self</span>:<span class="macro-nonterminal">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="kw-2">*</span><span class="macro-nonterminal">$</span><span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span> {
+                    <span class="kw">return</span> <span class="kw-2">*</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>;
+                };
+            };
+        }
+
         <span class="macro">set_mode!</span>(<span class="self">self</span>, <span class="self">Self</span><span class="ident">::Shell</span>, <span class="ident">Mode::Shell</span>, <span class="ident">mode</span>);
         <span class="macro">set_mode!</span>(<span class="self">self</span>, <span class="self">Self</span><span class="ident">::MultipleVictims</span>, <span class="ident">Mode::TargetAll</span>, <span class="ident">mode</span>);
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">mode</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Mode::Default</span> {
@@ -209,7 +207,16 @@
         }
     }
 
+    <span class="doccomment">/// Parse user input and to get Self</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">cmd</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="macro">macro_rules!</span> <span class="ident">derive_parse</span> {
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>.<span class="ident">get_val</span>() {
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>);
+                };
+            };
+        }
+
         <span class="kw">let</span> <span class="ident">cmd</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">trim</span>();
 
         <span class="macro">derive_parse!</span>(<span class="self">Self</span><span class="ident">::ListVictims</span>, <span class="ident">cmd</span>);
@@ -223,7 +230,8 @@
         <span class="prelude-val">Err</span>(<span class="ident">CliErrors::CommandNotFound</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_and_parse</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// runner command that parses input and sets mode</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_and_set_mode</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cmd</span> <span class="op">=</span> <span class="ident">Commands::parse</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>)<span class="question-mark">?</span>;
         <span class="ident">cmd</span>.<span class="ident">set_mode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s</span>.<span class="ident">mode</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">cmd</span>)
@@ -234,23 +242,16 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
-    <span class="macro">macro_rules!</span> <span class="ident">get_val_tests</span> {
-        (<span class="macro-nonterminal">$</span><span class="kw">enum</span>:<span class="macro-nonterminal">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="kw">enum</span>.<span class="macro-nonterminal">get_val</span>(), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">Commands::parse</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>).<span class="ident">unwrap</span>(), <span class="macro-nonterminal">$</span><span class="kw">enum</span>);
-        };
-    }
-
-    <span class="macro">macro_rules!</span> <span class="macro-nonterminal">mode_command_conv</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_mode</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>.<span class="ident">set_mode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>);
-            <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_mode</span>);
-        };
-    }
-
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">commands_work</span>() {
-        <span class="macro">get_val_tests!</span>(<span class="ident">Commands::ListVictims</span>, <span class="string">&quot;lsv&quot;</span>);
+        <span class="macro">macro_rules!</span> <span class="ident">get_val_tests</span> {
+            (<span class="macro-nonterminal">$</span><span class="kw">enum</span>:<span class="macro-nonterminal">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="kw">enum</span>.<span class="macro-nonterminal">get_val</span>(), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">Commands::parse</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>).<span class="ident">unwrap</span>(), <span class="macro-nonterminal">$</span><span class="kw">enum</span>);
+            };
+        }
+
+        <span class="macro">get_val_tests!</span>(<span class="macro-nonterminal">Commands::ListVictims</span>, <span class="string">&quot;lsv&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::SelectVictim</span>, <span class="string">&quot;select&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::MultipleVictims</span>, <span class="string">&quot;all&quot;</span>);
         <span class="macro">get_val_tests!</span>(<span class="ident">Commands::JavaScript</span>, <span class="string">&quot;js&quot;</span>);
@@ -266,6 +267,13 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">set_mode_works</span>() {
+        <span class="macro">macro_rules!</span> <span class="ident">mode_command_conv</span> {
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_mode</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">cmd</span>.<span class="ident">set_mode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>);
+                <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">mode</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_mode</span>);
+            };
+        }
+
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mode</span> <span class="op">=</span> <span class="ident">Mode::Default</span>;
         <span class="macro">mode_command_conv!</span>(<span class="ident">Commands::MultipleVictims</span>, <span class="ident">mode</span>, <span class="ident">Mode::TargetAll</span>);
         <span class="macro">mode_command_conv!</span>(<span class="ident">Commands::Shell</span>, <span class="ident">mode</span>, <span class="ident">Mode::Shell</span>);

