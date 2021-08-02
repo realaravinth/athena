@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["SHIPS",""]],"fn":[["get_name",""]],"struct":[["Exists",""]]});
+initSidebarItems({"constant":[["SHIPS",""]],"fn":[["get_name",""],["victim_exists",""]],"struct":[["Exists",""]]});
