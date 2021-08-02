@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use crate::AppData;
+use crate::{errors::ServiceResult, AppData};
 
 pub const SHIPS: [&str; 262] = [
     "Abe",
@@ -285,21 +285,29 @@ struct Exists {
     exists: Option<bool>,
 }
 
-pub async fn get_name(data: &AppData) -> &'static str {
+pub async fn get_name(data: &AppData) -> ServiceResult<&'static str> {
     for ship in SHIPS.iter() {
-        let exists = sqlx::query_as!(
-            Exists,
-            "SELECT EXISTS (SELECT 1 from cic_victims WHERE name = $1);",
-            ship
-        )
-        .fetch_one(&data.db)
-        .await
-        .unwrap();
-        if exists.exists.is_some() && !exists.exists.as_ref().unwrap() {
-            return ship;
+        if !victim_exists(&data, &ship).await? {
+            return Ok(ship);
         }
     }
     panic!();
+}
+
+pub async fn victim_exists(data: &AppData, victim: &str) -> ServiceResult<bool> {
+    let exists = sqlx::query_as!(
+        Exists,
+        "SELECT EXISTS (SELECT 1 from cic_victims WHERE name = $1);",
+        victim
+    )
+    .fetch_one(&data.db)
+    .await?;
+
+    if exists.exists.is_some() && *exists.exists.as_ref().unwrap() {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
 
 #[cfg(test)]
@@ -310,7 +318,7 @@ mod tests {
     async fn get_name_works() {
         let data = crate::data::Data::new().await;
         let data = actix_web::web::Data::new(data);
-        let name = get_name(&data).await;
+        let name = get_name(&data).await.unwrap();
         assert!(SHIPS.iter().any(|ship| ship == &name));
     }
 }

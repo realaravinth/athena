@@ -57,6 +57,7 @@ pub mod v1 {
         pub list_victims: &'static str,
         pub set_payload: &'static str,
         pub read_response: &'static str,
+        pub delete_victims: &'static str,
     }
 
     impl Attack {
@@ -65,6 +66,7 @@ pub mod v1 {
                 list_victims: "/api/v1/attack/join",
                 set_payload: "/api/v1/attack/payload/set",
                 read_response: "/api/v1/attack/payload/response",
+                delete_victims: "/api/v1/attack/payload/response",
             }
         }
     }

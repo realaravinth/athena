@@ -20,15 +20,27 @@ mod victim;
 
 use crate::errors::*;
 
-pub use ships::get_name;
+pub use ships::{get_name, victim_exists};
 
 pub async fn join_rnner(id: &actix_identity::Identity, data: &crate::AppData) -> ServiceResult<()> {
-    if id.identity().is_none() {
-        let name = get_name(data).await.to_string();
+    async fn register_victim(
+        id: &actix_identity::Identity,
+        data: &crate::AppData,
+    ) -> ServiceResult<()> {
+        let name = get_name(data).await?.to_string();
         sqlx::query!("INSERT INTO cic_victims (name) VALUES ($1);", &name)
             .execute(&data.db)
             .await?;
         id.remember(name);
+        Ok(())
+    }
+
+    if let Some(victim) = id.identity() {
+        if !victim_exists(&data, &victim).await? {
+            register_victim(id, data).await?;
+        }
+    } else {
+        register_victim(id, data).await?;
     }
     Ok(())
 }

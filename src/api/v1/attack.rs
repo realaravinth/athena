@@ -24,6 +24,7 @@ pub fn services(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(list_victims);
     cfg.service(set_payload);
     cfg.service(read_response);
+    cfg.service(delete_victims);
 }
 
 #[my_codegen::post(path = "crate::V1_ROUTES.attack.list_victims")]
@@ -93,4 +94,18 @@ async fn read_response(
     } else {
         Err(ServiceError::WrongPassword)
     }
+}
+
+#[my_codegen::post(path = "crate::V1_ROUTES.attack.delete_victims")]
+async fn delete_victims(data: AppData) -> ServiceResult<impl Responder> {
+    delete_runner(&data).await?;
+
+    Ok(HttpResponse::Ok())
+}
+
+pub async fn delete_runner(data: &AppData) -> ServiceResult<()> {
+    sqlx::query!("DELETE FROM cic_victims")
+        .execute(&data.db)
+        .await?;
+    Ok(())
 }
