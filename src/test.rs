@@ -21,6 +21,7 @@ use std::thread;
 use actix_web::dev::Server;
 use libathena::{payload::*, AthenaClientBuilder, Client};
 
+use crate::api::v1::attack::delete_runner;
 use crate::*;
 
 async fn run_app(tx: mpsc::Sender<Server>) -> std::io::Result<()> {
@@ -60,9 +61,8 @@ async fn everything_works() {
 
     {
         let data = crate::Data::new().await;
-        let _ = sqlx::query("DELETE FROM cic_victims")
-            .execute(&data.db)
-            .await;
+        let data = crate::AppData::new(data);
+        let _ = delete_runner(&data).await;
     };
 
     let (tx, rx) = mpsc::channel();
@@ -130,6 +130,16 @@ async fn everything_works() {
     assert!(responses
         .iter()
         .any(|resp| resp.response == Some(PAYLOAD_RESULT.into())));
+
+    // attacker delets all victims
+    athena.attack_delete_all_victims().await.unwrap();
+    let victims = athena.attack_list_victims().await.unwrap();
+    assert!(victims.is_empty());
+
+    // victim tries to fetch available payloads.
+    let _ = athena.victim_get_paylod().await.unwrap();
+    let victims = athena.attack_list_victims().await.unwrap();
+    assert!(!victims.is_empty());
 
     // stop server
     srv.stop(true).await;

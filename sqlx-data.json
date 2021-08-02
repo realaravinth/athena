@@ -30,6 +30,16 @@
       "nullable": []
     }
   },
+  "5a735267c7933d53a95f14722b40344496d0e60a57fde3d4bc733c3c7ebbcf56": {
+    "query": "DELETE FROM cic_victims",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  },
   "6c324f29def1d31d6a9134d4b0e7d542f448ef8efa5e18545b8f318209084af1": {
     "query": "UPDATE cic_messages SET response = $1\n        WHERE \n            id = $2\n        AND \n            victim_id = (SELECT ID from cic_victims WHERE name = $3)",
     "describe": {

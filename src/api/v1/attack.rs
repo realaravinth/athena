@@ -99,7 +99,6 @@ async fn read_response(
 #[my_codegen::post(path = "crate::V1_ROUTES.attack.delete_victims")]
 async fn delete_victims(data: AppData) -> ServiceResult<impl Responder> {
     delete_runner(&data).await?;
-
     Ok(HttpResponse::Ok())
 }
 

